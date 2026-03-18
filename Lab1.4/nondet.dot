@@ -1,0 +1,49 @@
+digraph NFA {
+    rankdir=LR;
+    node [shape=circle];
+    init [shape=point];
+
+    "2"  [shape=doublecircle];
+    "4"  [shape=doublecircle];
+    "6"  [shape=doublecircle];
+    "10" [shape=doublecircle];
+    "14" [shape=doublecircle];
+    "17" [shape=doublecircle];
+    "21" [shape=doublecircle];
+
+    init -> "0";
+
+    "0" -> "1"  [label="ε"];
+    "0" -> "3"  [label="ε"];
+    "0" -> "5"  [label="ε"];
+    "0" -> "7"  [label="ε"];
+    "0" -> "11" [label="ε"];
+    "0" -> "15" [label="ε"];
+    "0" -> "18" [label="ε"];
+
+    "1" -> "2" [label="ws"];
+    "2" -> "2" [label="ws"];
+
+    "3" -> "4" [label="letter"];
+    "4" -> "4" [label="letter|digit"];
+
+    "5" -> "6" [label="digit"];
+    "6" -> "6" [label="digit"];
+
+    "7" -> "8"  [label="k"];
+    "8" -> "9"  [label="e"];
+    "9" -> "10" [label="y"];
+
+    "11" -> "12" [label="v"];
+    "12" -> "13" [label="a"];
+    "13" -> "14" [label="l"];
+
+    "15" -> "16" [label="~"];
+    "16" -> "17" [label="~"];
+
+    "18" -> "19" [label="~"];
+    "19" -> "20" [label="non~"];
+    "19" -> "21" [label="~"];
+    "20" -> "20" [label="non~"];
+    "20" -> "21" [label="~"];
+}
