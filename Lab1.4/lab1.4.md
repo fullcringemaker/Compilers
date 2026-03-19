@@ -22,11 +22,116 @@ key, val, ~~, комментарии ограничены знаками ~, мо
 
 Граф недетерминированного распознавателя:
 
-![Граф недетерминированного распознавателя](nondet.png)
+```dot
+digraph NFA {
+    rankdir=LR;
+    node [shape=circle];
+    init [shape=point];
+
+    "2"  [shape=doublecircle];
+    "4"  [shape=doublecircle];
+    "6"  [shape=doublecircle];
+    "10" [shape=doublecircle];
+    "14" [shape=doublecircle];
+    "17" [shape=doublecircle];
+    "21" [shape=doublecircle];
+
+    init -> "0";
+
+    "0" -> "1"  [label="ε"];
+    "0" -> "3"  [label="ε"];
+    "0" -> "5"  [label="ε"];
+    "0" -> "7"  [label="ε"];
+    "0" -> "11" [label="ε"];
+    "0" -> "15" [label="ε"];
+    "0" -> "18" [label="ε"];
+
+    "1" -> "2" [label="ws"];
+    "2" -> "2" [label="ws"];
+
+    "3" -> "4" [label="letter"];
+    "4" -> "4" [label="letter|digit"];
+
+    "5" -> "6" [label="digit"];
+    "6" -> "6" [label="digit"];
+
+    "7" -> "8"  [label="k"];
+    "8" -> "9"  [label="e"];
+    "9" -> "10" [label="y"];
+
+    "11" -> "12" [label="v"];
+    "12" -> "13" [label="a"];
+    "13" -> "14" [label="l"];
+
+    "15" -> "16" [label="~"];
+    "16" -> "17" [label="~"];
+
+    "18" -> "19" [label="~"];
+    "19" -> "20" [label="non~"];
+    "19" -> "21" [label="~"];
+    "20" -> "20" [label="non~"];
+    "20" -> "21" [label="~"];
+}
+```
 
 Граф детерминированного распознавателя:
 
-![Граф детерминированного распознавателя](det.png)
+```dot
+digraph DFA {
+    rankdir=LR;
+    node [shape=circle];
+    init [shape=point];
+
+    "1"  [shape=doublecircle];
+    "2"  [shape=doublecircle];
+    "3"  [shape=doublecircle];
+    "4"  [shape=doublecircle];
+    "5"  [shape=doublecircle];
+    "6"  [shape=doublecircle];
+    "7"  [shape=doublecircle];
+    "8"  [shape=doublecircle];
+    "9"  [shape=doublecircle];
+    "11" [shape=doublecircle];
+    "13" [shape=doublecircle];
+
+    init -> "0";
+
+    "0" -> "1"  [label="ws"];
+    "0" -> "2"  [label="digit"];
+    "0" -> "4"  [label="k"];
+    "0" -> "3"  [label="e | y | a | l | other_letter"];
+    "0" -> "7"  [label="v"];
+    "0" -> "10" [label="~"];
+
+    "1" -> "1" [label="ws"];
+
+    "2" -> "2" [label="digit"];
+
+    "3" -> "3" [label="letter | digit"];
+
+    "4" -> "5" [label="e"];
+    "4" -> "3" [label="other_letter | digit"];
+
+    "5" -> "6" [label="y"];
+    "5" -> "3" [label="other_letter | digit"];
+
+    "6" -> "3" [label="letter | digit"];
+
+    "7" -> "8" [label="a"];
+    "7" -> "3" [label="other_letter | digit"];
+
+    "8" -> "9" [label="l"];
+    "8" -> "3" [label="other_letter | digit"];
+
+    "9" -> "3" [label="letter | digit"];
+
+    "10" -> "11" [label="~"];
+    "10" -> "12" [label="non~"];
+
+    "12" -> "12" [label="non~"];
+    "12" -> "13" [label="~"];
+}
+```
 
 Реализация распознавателя:
 
