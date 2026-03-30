@@ -1,0 +1,11 @@
+key val abc x1 123
+123abc 77key 5val
+keys
+~~
+~abc~
+~one
+two
+three~
+key
+@
+~
