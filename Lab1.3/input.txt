@@ -1,0 +1,25 @@
+abc
+_name
+$123user123
+@temp
+a1_b2$c3@d4
+brep
+
+123
+1_234
+33_7
+5___6
+
+"hello"  "code 30 is \x30" "code 4F is \x4f"
+"line\nbreak"
+"quote: \""
+"tab\tend"
+"slash \\"
+
+abc123 "test" 45_67 @name
+
+"unfinished
+12a
+#
+bad&token
+"wrong\qescape"
