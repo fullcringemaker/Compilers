@@ -192,6 +192,10 @@ class UnOpExpr(Expr):
     op: str
     expr: Expr
 
+@dataclass
+class NoReturnType:
+    pass
+
 # # ---------- Terminals ----------
 
 IDENT = pe.Terminal('IDENT', '[A-Za-z][A-Za-z0-9_]*', str)
@@ -258,26 +262,39 @@ KW_T = make_keyword('T')
 
 # ---------- NonTerminals ----------
 
-NProgram, NFunctionDefs, NFunctionDef, NFormalParamsOpt, NFormalParams = \
-    map(pe.NonTerminal, 'Program FunctionDefs FunctionDef FormalParamsOpt FormalParams'.split())
+NProgram, NFunctionDefs, NFunctionDef, NFunctionHeader, NReturnTypeOpt = \
+    map(pe.NonTerminal, 'Program FunctionDefs FunctionDef FunctionHeader ReturnTypeOpt'.split())
 
-NFormalParam, NType, NPrimitiveType, NStatements, NStatement = \
-    map(pe.NonTerminal, 'FormalParam Type PrimitiveType Statements Statement'.split())
+NFormalParamsOpt, NFormalParams, NFormalParam, NType, NPrimitiveType = \
+    map(pe.NonTerminal, 'FormalParamsOpt FormalParams FormalParam Type PrimitiveType'.split())
 
-NDeclItems, NDeclItem, NElsifParts, NElsePartOpt, NExpr = \
-    map(pe.NonTerminal, 'DeclItems DeclItem ElsifParts ElsePartOpt Expr'.split())
+NStatementBlock, NStatements, NStatement = \
+    map(pe.NonTerminal, 'StatementBlock Statements Statement'.split())
 
-NOrExpr, NOrOp, NAndExpr, NCmpExpr, NCmpOp = \
-    map(pe.NonTerminal, 'OrExpr OrOp AndExpr CmpExpr CmpOp'.split())
+NDeclStatement, NDeclItems, NDeclItem = \
+    map(pe.NonTerminal, 'DeclStatement DeclItems DeclItem'.split())
 
-NAddExpr, NAddOp, NMulExpr, NMulOp, NPowExpr = \
-    map(pe.NonTerminal, 'AddExpr AddOp MulExpr MulOp PowExpr'.split())
+NAssignStatement, NCallStatement, NIfStatement = \
+    map(pe.NonTerminal, 'AssignStatement CallStatement IfStatement'.split())
 
-NUnaryExpr, NPostfixExpr, NPrimaryExpr, NFunctionCall, NActualParamsOpt = \
-    map(pe.NonTerminal, 'UnaryExpr PostfixExpr PrimaryExpr FunctionCall ActualParamsOpt'.split())
+NElsifParts, NElsePartOpt, NWhileStatement = \
+    map(pe.NonTerminal, 'ElsifParts ElsePartOpt WhileStatement'.split())
 
-NActualParams, NConst = \
-    map(pe.NonTerminal, 'ActualParams Const'.split())
+NForStatement, NForInit, NStepOpt, NDoWhileStatement = \
+    map(pe.NonTerminal, 'ForStatement ForInit StepOpt DoWhileStatement'.split())
+
+NReturnStatement, NAssertStatement, NExpr, NOrExpr, NOrOp = \
+    map(pe.NonTerminal, 'ReturnStatement AssertStatement Expr OrExpr OrOp'.split())
+
+NAndExpr, NCmpExpr, NCmpOp, NAddExpr, NAddOp = \
+    map(pe.NonTerminal, 'AndExpr CmpExpr CmpOp AddExpr AddOp'.split())
+
+NMulExpr, NMulOp, NPowExpr, NUnaryExpr, NPostfixExpr = \
+    map(pe.NonTerminal, 'MulExpr MulOp PowExpr UnaryExpr PostfixExpr'.split())
+
+NPrimaryExpr, NFunctionCall, NActualParamsOpt, NActualParams, NConstant = \
+    map(pe.NonTerminal, 'PrimaryExpr FunctionCall ActualParamsOpt ActualParams Constant'.split())
+
 
 # ---------- Грамматика ----------
 
@@ -286,14 +303,18 @@ NProgram |= NFunctionDefs, Program
 NFunctionDefs |= NFunctionDef, lambda fd: [fd]
 NFunctionDefs |= NFunctionDefs, NFunctionDef, lambda fds, fd: fds + [fd]
 
-NFunctionDef |= (
-    KW_DEFINE, FUNCNAME, '(', NFormalParamsOpt, ')', NStatements, KW_END,
-    lambda name, params, body: FunctionDef(name, params, None, body)
-)
-NFunctionDef |= (
-    KW_DEFINE, NType, FUNCNAME, '(', NFormalParamsOpt, ')', NStatements, KW_END,
-    lambda tp, name, params, body: FunctionDef(name, params, tp, body)
-)
+NFunctionDef |= KW_DEFINE, NFunctionHeader, NStatementBlock, KW_END, \
+    lambda header, body: FunctionDef(header[1], header[2], header[0], body)
+
+NFunctionHeader |= NReturnTypeOpt, FUNCNAME, '(', NFormalParamsOpt, ')', \
+    lambda rt, name, params: (
+        None if isinstance(rt, NoReturnType) else rt,
+        name,
+        params
+    )
+
+NReturnTypeOpt |= NoReturnType
+NReturnTypeOpt |= NType
 
 NFormalParamsOpt |= lambda: []
 NFormalParamsOpt |= NFormalParams
@@ -310,45 +331,23 @@ NPrimitiveType |= KW_INT, lambda: Type.Int
 NPrimitiveType |= KW_CHAR, lambda: Type.Char
 NPrimitiveType |= KW_BOOL, lambda: Type.Bool
 
-NStatements |= lambda: []
+NStatementBlock |= lambda: []
+NStatementBlock |= NStatements
+
 NStatements |= NStatement, lambda st: [st]
 NStatements |= NStatements, ';', NStatement, lambda sts, st: sts + [st]
 
-NStatement |= NType, NDeclItems, DeclStatement
-NStatement |= NExpr, ':=', NExpr, AssignStatement
-NStatement |= NFunctionCall, CallStatement
-NStatement |= (
-    KW_IF, NExpr, KW_THEN, NStatements, NElsifParts, NElsePartOpt, KW_END,
-    lambda cond, then_body, elsifs, else_body:
-        IfStatement([IfBranch(cond, then_body)] + elsifs, else_body)
-)
-NStatement |= KW_WHILE, NExpr, KW_DO, NStatements, KW_END, WhileStatement
+NStatement |= NDeclStatement
+NStatement |= NAssignStatement
+NStatement |= NCallStatement
+NStatement |= NIfStatement
+NStatement |= NWhileStatement
+NStatement |= NForStatement
+NStatement |= NDoWhileStatement
+NStatement |= NReturnStatement
+NStatement |= NAssertStatement
 
-NStatement |= (
-    IDENT, ':=', NExpr, KW_TO, NExpr, KW_DO, NStatements, KW_END,
-    lambda name, start, end, body:
-        ForStatement(None, name, start, end, ConstExpr('1', Type.Int), body)
-)
-NStatement |= (
-    IDENT, ':=', NExpr, KW_TO, NExpr, KW_STEP, NExpr, KW_DO, NStatements, KW_END,
-    lambda name, start, end, step, body:
-        ForStatement(None, name, start, end, step, body)
-)
-NStatement |= (
-    NType, IDENT, ':=', NExpr, KW_TO, NExpr, KW_DO, NStatements, KW_END,
-    lambda tp, name, start, end, body:
-        ForStatement(tp, name, start, end, ConstExpr('1', Type.Int), body)
-)
-NStatement |= (
-    NType, IDENT, ':=', NExpr, KW_TO, NExpr, KW_STEP, NExpr, KW_DO, NStatements, KW_END,
-    lambda tp, name, start, end, step, body:
-        ForStatement(tp, name, start, end, step, body)
-)
-
-NStatement |= KW_DO, NStatements, KW_WHILE, NExpr, DoWhileStatement
-NStatement |= KW_RETURN, lambda: ReturnStatement(None)
-NStatement |= KW_RETURN, NExpr, ReturnStatement
-NStatement |= KW_ASSERT, NExpr, AssertStatement
+NDeclStatement |= NType, NDeclItems, DeclStatement
 
 NDeclItems |= NDeclItem, lambda item: [item]
 NDeclItems |= NDeclItems, ',', NDeclItem, lambda items, item: items + [item]
@@ -356,14 +355,38 @@ NDeclItems |= NDeclItems, ',', NDeclItem, lambda items, item: items + [item]
 NDeclItem |= IDENT, lambda name: DeclItem(name, None)
 NDeclItem |= IDENT, ':=', NExpr, DeclItem
 
+NAssignStatement |= NExpr, ':=', NExpr, AssignStatement
+
+NCallStatement |= NFunctionCall, CallStatement
+
+NIfStatement |= KW_IF, NExpr, KW_THEN, NStatementBlock, NElsifParts, NElsePartOpt, KW_END, \
+    lambda cond, then_body, elsifs, else_body: \
+        IfStatement([IfBranch(cond, then_body)] + elsifs, else_body)
+
 NElsifParts |= lambda: []
-NElsifParts |= (
-    NElsifParts, KW_ELSIF, NExpr, KW_THEN, NStatements,
+NElsifParts |= NElsifParts, KW_ELSIF, NExpr, KW_THEN, NStatementBlock, \
     lambda branches, cond, body: branches + [IfBranch(cond, body)]
-)
 
 NElsePartOpt |= lambda: []
-NElsePartOpt |= KW_ELSE, NStatements, lambda body: body
+NElsePartOpt |= KW_ELSE, NStatementBlock, lambda body: body
+
+NWhileStatement |= KW_WHILE, NExpr, KW_DO, NStatementBlock, KW_END, WhileStatement
+
+NForStatement |= NForInit, KW_TO, NExpr, NStepOpt, KW_DO, NStatementBlock, KW_END, \
+    lambda init, end, step, body: ForStatement(init[0], init[1], init[2], end, step, body)
+
+NForInit |= IDENT, ':=', NExpr, lambda name, expr: (None, name, expr)
+NForInit |= NType, IDENT, ':=', NExpr, lambda tp, name, expr: (tp, name, expr)
+
+NStepOpt |= lambda: ConstExpr('1', Type.Int)
+NStepOpt |= KW_STEP, NExpr, lambda expr: expr
+
+NDoWhileStatement |= KW_DO, NStatementBlock, KW_WHILE, NExpr, DoWhileStatement
+
+NReturnStatement |= KW_RETURN, lambda: ReturnStatement(None)
+NReturnStatement |= KW_RETURN, NExpr, ReturnStatement
+
+NAssertStatement |= KW_ASSERT, NExpr, AssertStatement
 
 NExpr |= NOrExpr
 
@@ -410,7 +433,7 @@ NPostfixExpr |= NPrimaryExpr
 NPostfixExpr |= NPostfixExpr, '[', NExpr, ']', IndexExpr
 
 NPrimaryExpr |= IDENT, VariableExpr
-NPrimaryExpr |= NConst
+NPrimaryExpr |= NConstant
 NPrimaryExpr |= NFunctionCall
 NPrimaryExpr |= KW_NEW, NType, '[', NExpr, ']', NewExpr
 NPrimaryExpr |= '(', NExpr, ')'
@@ -423,12 +446,12 @@ NActualParamsOpt |= NActualParams
 NActualParams |= NExpr, lambda expr: [expr]
 NActualParams |= NActualParams, ',', NExpr, lambda args, expr: args + [expr]
 
-NConst |= INT_CONST, lambda value: ConstExpr(value, Type.Int)
-NConst |= CHAR_CONST, lambda value: ConstExpr(value, Type.Char)
-NConst |= STRING_CONST, lambda value: ConstExpr(value, ArrayType(Type.Char))
-NConst |= KW_T, lambda: ConstExpr(True, Type.Bool)
-NConst |= KW_F, lambda: ConstExpr(False, Type.Bool)
-NConst |= KW_NULL, lambda: ConstExpr(None, None)
+NConstant |= INT_CONST, lambda value: ConstExpr(value, Type.Int)
+NConstant |= CHAR_CONST, lambda value: ConstExpr(value, Type.Char)
+NConstant |= STRING_CONST, lambda value: ConstExpr(value, ArrayType(Type.Char))
+NConstant |= KW_T, lambda: ConstExpr(True, Type.Bool)
+NConstant |= KW_F, lambda: ConstExpr(False, Type.Bool)
+NConstant |= KW_NULL, lambda: ConstExpr(None, None)
 
 # ---------- Parser ----------
 
