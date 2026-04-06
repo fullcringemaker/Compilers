@@ -15,12 +15,10 @@ class Type(enum.Enum):
     Char = 'char'
     Bool = 'bool'
 
-
 # Type → Type ARRAY
 @dataclass
 class ArrayType:
     type: typing.Any
-
 
 # Parameter → VarName Type
 @dataclass
@@ -28,20 +26,16 @@ class Parameter:
     name: str
     type: typing.Any
 
-
 class Statement(abc.ABC):
     pass
 
-
 class Expr(abc.ABC):
     pass
-
 
 # Program → Function*
 @dataclass
 class Program:
     functions: list[typing.Any]
-
 
 # Function → FuncName Parameters ReturnType? Statements
 @dataclass
@@ -51,13 +45,11 @@ class FunctionDef:
     return_type: typing.Optional[typing.Any]
     body: list[Statement]
 
-
 # DeclItem → VarName Expr?
 @dataclass
 class DeclItem:
     name: str
     expr: typing.Optional[Expr]
-
 
 # Statement → DeclStatement
 # DeclStatement → Type DeclItem+
@@ -66,14 +58,12 @@ class DeclStatement(Statement):
     type: typing.Any
     items: list[DeclItem]
 
-
 # Statement → AssignStatement
 # AssignStatement → LValue Expr
 @dataclass
 class AssignStatement(Statement):
     variable: Expr
     expr: Expr
-
 
 # Expr → FuncCallExpr
 # FuncCallExpr → FuncName Arguments
@@ -82,19 +72,16 @@ class CallExpr(Expr):
     func: str
     args: list[Expr]
 
-
 # Statement → CallStatement
 @dataclass
 class CallStatement(Statement):
     call: CallExpr
-
 
 # Branch → Expr Statements
 @dataclass
 class IfBranch:
     condition: Expr
     body: list[Statement]
-
 
 # Statement → IfStatement
 # IfStatement → Branch+ ElseBranch?
@@ -103,14 +90,12 @@ class IfStatement(Statement):
     branches: list[IfBranch]
     else_body: list[Statement]
 
-
 # Statement → WhileStatement
 # WhileStatement → Expr Statements
 @dataclass
 class WhileStatement(Statement):
     condition: Expr
     body: list[Statement]
-
 
 # Statement → ForStatement
 # ForStatement → ForTarget Expr Expr? Statements
@@ -123,7 +108,6 @@ class ForStatement(Statement):
     step: Expr
     body: list[Statement]
 
-
 # Statement → DoWhileStatement
 # DoWhileStatement → Statements Expr
 @dataclass
@@ -131,13 +115,11 @@ class DoWhileStatement(Statement):
     body: list[Statement]
     condition: Expr
 
-
 # Statement → ReturnStatement
 # ReturnStatement → Expr?
 @dataclass
 class ReturnStatement(Statement):
     expr: typing.Optional[Expr]
-
 
 # Statement → AssertStatement
 # AssertStatement → Expr
@@ -145,12 +127,10 @@ class ReturnStatement(Statement):
 class AssertStatement(Statement):
     condition: Expr
 
-
 # Expr → VariableExpr
 @dataclass
 class VariableExpr(Expr):
     varname: str
-
 
 # Expr → ConstExpr
 # ConstExpr → INT_CONST | CHAR_CONST | STRING_CONST | T | F | NULL
@@ -159,14 +139,12 @@ class ConstExpr(Expr):
     value: typing.Any
     type: typing.Any
 
-
 # Expr → ArrayAccessExpr
 # ArrayAccessExpr → Expr Expr
 @dataclass
 class IndexExpr(Expr):
     array: Expr
     index: Expr
-
 
 # Expr → NewArrayExpr
 # NewArrayExpr → Type Expr
@@ -175,7 +153,6 @@ class NewExpr(Expr):
     type: typing.Any
     size: Expr
 
-
 # Expr → Expr BinOp Expr
 # BinOp → ** | * | / | MOD | + | - | = | <> | < | > | <= | >= | AND | OR | XOR
 @dataclass
@@ -183,7 +160,6 @@ class BinOpExpr(Expr):
     left: Expr
     op: str
     right: Expr
-
 
 # Expr → UnOp Expr
 # UnOp → - | NOT
@@ -294,7 +270,6 @@ NMulExpr, NMulOp, NPowExpr, NUnaryExpr, NPostfixExpr = \
 
 NPrimaryExpr, NFunctionCall, NActualParamsOpt, NActualParams, NConstant = \
     map(pe.NonTerminal, 'PrimaryExpr FunctionCall ActualParamsOpt ActualParams Constant'.split())
-
 
 # ---------- Грамматика ----------
 
