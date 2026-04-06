@@ -1,91 +1,46 @@
-from __future__ import annotations
-
 import abc
 import enum
 import typing
 from dataclasses import dataclass
+import parser_edsl as pe
+import re
 from pprint import pprint
 import sys
 
-import parser_edsl as pe
+# ---------- Узлы абстрактного синтаксического дерева ----------
 
-
-MAX_INT = 2147483647
-
-CONTROL_CODES = {
-    'NUL': 0,
-    'SOH': 1,
-    'STX': 2,
-    'ETX': 3,
-    'EOT': 4,
-    'ENQ': 5,
-    'ACK': 6,
-    'BEL': 7,
-    'BS': 8,
-    'TAB': 9,
-    'LF': 10,
-    'VT': 11,
-    'FF': 12,
-    'CR': 13,
-    'SO': 14,
-    'SI': 15,
-    'DLE': 16,
-    'DC1': 17,
-    'DC2': 18,
-    'DC3': 19,
-    'DC4': 20,
-    'NAK': 21,
-    'SYN': 22,
-    'ETB': 23,
-    'CAN': 24,
-    'EM': 25,
-    'SUB': 26,
-    'ESC': 27,
-    'FS': 28,
-    'GS': 29,
-    'RS': 30,
-    'US': 31,
-}
-
-
-class Type(abc.ABC):
-    pass
-
-
-# PrimitiveType → int | char | bool
-class BasicType(enum.Enum):
+# Type → INT | CHAR | BOOL
+class Type(enum.Enum):
     Int = 'int'
     Char = 'char'
     Bool = 'bool'
 
 
-# Type → PrimitiveType
+# Type → Type ARRAY
 @dataclass
-class PrimitiveType(Type):
-    kind: BasicType
+class ArrayType:
+    type: typing.Any
 
 
-# Type → Type array
-@dataclass
-class ArrayType(Type):
-    element_type: Type
-
-
-# Parameter → Type VarName
+# Parameter → VarName Type
 @dataclass
 class Parameter:
-    type: Type
     name: str
+    type: typing.Any
 
 
 class Statement(abc.ABC):
     pass
 
 
+class Expr(abc.ABC):
+    pass
+
+
 # Program → Function*
 @dataclass
 class Program:
-    functions: list[FunctionDef]
+    functions: list[typing.Any]
 
 
 # Function → FuncName Parameters ReturnType? Statements
@@ -93,7 +48,7 @@ class Program:
 class FunctionDef:
     name: str
     params: list[Parameter]
-    return_type: typing.Optional[Type]
+    return_type: typing.Optional[typing.Any]
     body: list[Statement]
 
 
@@ -101,27 +56,37 @@ class FunctionDef:
 @dataclass
 class DeclItem:
     name: str
-    initializer: typing.Optional[Expr]
+    expr: typing.Optional[Expr]
 
 
 # Statement → DeclStatement
+# DeclStatement → Type DeclItem+
 @dataclass
-class DeclarationStatement(Statement):
-    type: Type
+class DeclStatement(Statement):
+    type: typing.Any
     items: list[DeclItem]
 
 
 # Statement → AssignStatement
+# AssignStatement → LValue Expr
 @dataclass
 class AssignStatement(Statement):
-    left: Expr
-    right: Expr
+    variable: Expr
+    expr: Expr
+
+
+# Expr → FuncCallExpr
+# FuncCallExpr → FuncName Arguments
+@dataclass
+class CallExpr(Expr):
+    func: str
+    args: list[Expr]
 
 
 # Statement → CallStatement
 @dataclass
 class CallStatement(Statement):
-    call: FunctionCallExpr
+    call: CallExpr
 
 
 # Branch → Expr Statements
@@ -132,37 +97,35 @@ class IfBranch:
 
 
 # Statement → IfStatement
+# IfStatement → Branch+ ElseBranch?
 @dataclass
 class IfStatement(Statement):
     branches: list[IfBranch]
-    else_branch: typing.Optional[list[Statement]]
+    else_body: list[Statement]
 
 
 # Statement → WhileStatement
+# WhileStatement → Expr Statements
 @dataclass
 class WhileStatement(Statement):
     condition: Expr
     body: list[Statement]
 
 
-# ForInit → VarName Expr | VarName Type Expr
-@dataclass
-class ForInit:
-    var_type: typing.Optional[Type]
-    name: str
-    start: Expr
-
-
 # Statement → ForStatement
+# ForStatement → ForTarget Expr Expr? Statements
 @dataclass
 class ForStatement(Statement):
-    init: ForInit
+    type: typing.Optional[typing.Any]
+    variable: str
+    start: Expr
     end: Expr
-    step: typing.Optional[Expr]
+    step: Expr
     body: list[Statement]
 
 
 # Statement → DoWhileStatement
+# DoWhileStatement → Statements Expr
 @dataclass
 class DoWhileStatement(Statement):
     body: list[Statement]
@@ -170,64 +133,51 @@ class DoWhileStatement(Statement):
 
 
 # Statement → ReturnStatement
+# ReturnStatement → Expr?
 @dataclass
 class ReturnStatement(Statement):
     expr: typing.Optional[Expr]
 
 
 # Statement → AssertStatement
+# AssertStatement → Expr
 @dataclass
 class AssertStatement(Statement):
     condition: Expr
 
 
-class Expr(abc.ABC):
-    pass
-
-
-# Expr → VarName
+# Expr → VariableExpr
 @dataclass
 class VariableExpr(Expr):
-    name: str
+    varname: str
 
 
-# Expr → Const
-# Const → IntConst | CharConst | StringConst | BoolConst | NullConst
+# Expr → ConstExpr
+# ConstExpr → INT_CONST | CHAR_CONST | STRING_CONST | T | F | NULL
 @dataclass
 class ConstExpr(Expr):
     value: typing.Any
-    kind: str
+    type: typing.Any
 
 
-# Expr → FuncCallExpr
+# Expr → ArrayAccessExpr
+# ArrayAccessExpr → Expr Expr
 @dataclass
-class FunctionCallExpr(Expr):
-    name: str
-    args: list[Expr]
-
-
-# Expr → Expr Expr
-@dataclass
-class ArrayAccessExpr(Expr):
+class IndexExpr(Expr):
     array: Expr
     index: Expr
 
 
-# Expr → Type Expr
+# Expr → NewArrayExpr
+# NewArrayExpr → Type Expr
 @dataclass
-class NewArrayExpr(Expr):
-    type: Type
+class NewExpr(Expr):
+    type: typing.Any
     size: Expr
 
 
-# Expr → UnOp Expr
-@dataclass
-class UnOpExpr(Expr):
-    op: str
-    expr: Expr
-
-
 # Expr → Expr BinOp Expr
+# BinOp → ** | * | / | MOD | + | - | = | <> | < | > | <= | >= | AND | OR | XOR
 @dataclass
 class BinOpExpr(Expr):
     left: Expr
@@ -235,119 +185,101 @@ class BinOpExpr(Expr):
     right: Expr
 
 
-def parse_int_literal(image: str) -> int:
-    if image.startswith('{'):
-        closing = image.find('}')
-        if closing == -1:
-            raise pe.TokenAttributeError(f'Некорректная целочисленная константа: {image}')
+# Expr → UnOp Expr
+# UnOp → - | NOT
+@dataclass
+class UnOpExpr(Expr):
+    op: str
+    expr: Expr
 
-        base = int(image[1:closing])
-        digits = image[closing + 1:]
-        if not (2 <= base <= 36):
-            raise pe.TokenAttributeError(f'Недопустимое основание системы счисления: {base}')
-        if not digits:
-            raise pe.TokenAttributeError(f'Некорректная целочисленная константа: {image}')
+# # ---------- Terminals ----------
 
-        try:
-            value = int(digits, base)
-        except ValueError:
-            raise pe.TokenAttributeError(f'Некорректная запись числа: {image}')
-    else:
-        value = int(image, 10)
-
-    if value > MAX_INT:
-        raise pe.TokenAttributeError(f'Слишком большое целое число: {image}')
-
-    return value
-
-
-def parse_char_literal(image: str) -> str:
-    if image.startswith("'"):
-        inner = image[1:-1].replace("''", "'")
-        if len(inner) != 1:
-            raise pe.TokenAttributeError(f'Символьная константа должна содержать ровно один символ: {image}')
-        return inner
-
-    if image.startswith('#{') and image.endswith('}'):
-        code = int(image[2:-1], 16)
-        return chr(code)
-
-    if image.startswith('#'):
-        name = image[1:]
-        if name not in CONTROL_CODES:
-            raise pe.TokenAttributeError(f'Неизвестная аббревиатура управляющего символа: {image}')
-        return chr(CONTROL_CODES[name])
-
-    raise pe.TokenAttributeError(f'Некорректная символьная константа: {image}')
-
-
-def parse_string_text_section(image: str) -> str:
-    return image[1:-1]
-
-
-def parse_string_control_section(image: str) -> str:
-    if image == '$QUOT':
-        return '"'
-
-    if image.startswith('${') and image.endswith('}'):
-        code = int(image[2:-1], 16)
-        return chr(code)
-
-    name = image[1:]
-    if name not in CONTROL_CODES:
-        raise pe.TokenAttributeError(f'Неизвестная строковая секция: {image}')
-    return chr(CONTROL_CODES[name])
-
-
-IDENT = pe.Terminal('IDENT', r'[^\W\d_]\w*', str)
+IDENT = pe.Terminal('IDENT', '[A-Za-z][A-Za-z0-9_]*', str)
+FUNCNAME = pe.Terminal('FUNCNAME', '[A-Z][A-Za-z0-9_]*(?=\\s*\\()', str)
 INT_CONST = pe.Terminal(
     'INT_CONST',
-    r'(?:\{\d+\}[0-9A-Za-z]+|[0-9]+)',
-    parse_int_literal,
-    priority=7,
+    '(\\{[0-9]+\\}[0-9A-Za-z]+|[0-9]+)',
+    str,
+    priority=7
 )
 CHAR_CONST = pe.Terminal(
     'CHAR_CONST',
-    r"(?:'(?:[^'\n]|'')+'|\#[A-Za-z][A-Za-z0-9]*|\#\{[0-9A-Fa-f]+\})",
-    parse_char_literal,
-    priority=7,
+    "'([^'\\n]|'')'|\\#[A-Z]+|\\#\\{[0-9A-Fa-f]+\\}",
+    str,
+    priority=7
 )
-STRING_TEXT_SECTION = pe.Terminal(
-    'STRING_TEXT_SECTION',
-    r'"[^"\x00-\x1F]*"',
-    parse_string_text_section,
-    priority=7,
-)
-STRING_CONTROL_SECTION = pe.Terminal(
-    'STRING_CONTROL_SECTION',
-    r'\$(?:[A-Z][A-Z0-9]*|\{[0-9A-Fa-f]+\})',
-    parse_string_control_section,
-    priority=7,
+STRING_CONST = pe.Terminal(
+    'STRING_CONST',
+    '("([^"\\n])*"|\\$QUOT|\\$[A-Z]+|\\$\\{[0-9A-Fa-f]+\\})([ \\t\\r\\n]+("([^"\\n])*"|\\$QUOT|\\$[A-Z]+|\\$\\{[0-9A-Fa-f]+\\}))*',
+    str,
+    priority=7
 )
 
+def make_keyword(word):
+    return pe.Terminal(
+        word.upper(),
+        word,
+        lambda _: None,
+        re_flags=re.IGNORECASE,
+        priority=10
+    )
 
-(NProgram, NFunctionDefs, NFunctionDef, NReturnTypeOpt, NFormalParamsOpt,
- NFormalParams, NFormalParam, NType, NPrimitiveType, NStatementBlock,
- NStatements, NStatement, NDeclStatement, NDeclItems, NDeclItem,
- NAssignStatement, NCallStatement, NIfStatement, NElsifParts,
- NElsePartOpt, NWhileStatement, NForStatement, NForInit, NStepOpt,
- NDoWhileStatement, NReturnStatement, NAssertStatement, NExpr,
- NOrExpr, NOrOp, NAndExpr, NCmpExpr, NCmpOp, NAddExpr, NAddOp,
- NMulExpr, NMulOp, NPowExpr, NUnaryExpr, NPostfixExpr, NPrimaryExpr,
- NFunctionCall, NActualParamsOpt, NActualParams, NConst,
- NStringConst, NStringSection) = map(
-    pe.NonTerminal,
-    'Program FunctionDefs FunctionDef ReturnTypeOpt FormalParamsOpt '
-    'FormalParams FormalParam Type PrimitiveType StatementBlock '
-    'Statements Statement DeclStatement DeclItems DeclItem '
-    'AssignStatement CallStatement IfStatement ElsifParts '
-    'ElsePartOpt WhileStatement ForStatement ForInit StepOpt '
-    'DoWhileStatement ReturnStatement AssertStatement Expr '
-    'OrExpr OrOp AndExpr CmpExpr CmpOp AddExpr AddOp '
-    'MulExpr MulOp PowExpr UnaryExpr PostfixExpr PrimaryExpr '
-    'FunctionCall ActualParamsOpt ActualParams Const '
-    'StringConst StringSection'.split()
-)
+KW_AND = make_keyword('and')
+KW_ELSE = make_keyword('else')
+KW_NEW = make_keyword('new')
+KW_THEN = make_keyword('then')
+
+KW_ARRAY = make_keyword('array')
+KW_ELSIF = make_keyword('elsif')
+KW_NOT = make_keyword('not')
+KW_TO = make_keyword('to')
+
+KW_ASSERT = make_keyword('assert')
+KW_END = make_keyword('end')
+KW_NULL = make_keyword('NULL')
+KW_WHILE = make_keyword('while')
+
+KW_BOOL = make_keyword('bool')
+KW_F = make_keyword('F')
+KW_OR = make_keyword('or')
+KW_XOR = make_keyword('xor')
+
+KW_CHAR = make_keyword('char')
+KW_IF = make_keyword('if')
+KW_RETURN = make_keyword('return')
+
+KW_DEFINE = make_keyword('define')
+KW_INT = make_keyword('int')
+KW_STEP = make_keyword('step')
+
+KW_DO = make_keyword('do')
+KW_MOD = make_keyword('mod')
+KW_T = make_keyword('T')
+
+# ---------- NonTerminals ----------
+
+NProgram, NFunctionDefs, NFunctionDef, NFormalParamsOpt, NFormalParams = \
+    map(pe.NonTerminal, 'Program FunctionDefs FunctionDef FormalParamsOpt FormalParams'.split())
+
+NFormalParam, NType, NPrimitiveType, NStatements, NStatement = \
+    map(pe.NonTerminal, 'FormalParam Type PrimitiveType Statements Statement'.split())
+
+NDeclItems, NDeclItem, NElsifParts, NElsePartOpt, NExpr = \
+    map(pe.NonTerminal, 'DeclItems DeclItem ElsifParts ElsePartOpt Expr'.split())
+
+NOrExpr, NOrOp, NAndExpr, NCmpExpr, NCmpOp = \
+    map(pe.NonTerminal, 'OrExpr OrOp AndExpr CmpExpr CmpOp'.split())
+
+NAddExpr, NAddOp, NMulExpr, NMulOp, NPowExpr = \
+    map(pe.NonTerminal, 'AddExpr AddOp MulExpr MulOp PowExpr'.split())
+
+NUnaryExpr, NPostfixExpr, NPrimaryExpr, NFunctionCall, NActualParamsOpt = \
+    map(pe.NonTerminal, 'UnaryExpr PostfixExpr PrimaryExpr FunctionCall ActualParamsOpt'.split())
+
+NActualParams, NConst = \
+    map(pe.NonTerminal, 'ActualParams Const'.split())
+
+# ---------- Грамматика ----------
 
 NProgram |= NFunctionDefs, Program
 
@@ -355,13 +287,13 @@ NFunctionDefs |= NFunctionDef, lambda fd: [fd]
 NFunctionDefs |= NFunctionDefs, NFunctionDef, lambda fds, fd: fds + [fd]
 
 NFunctionDef |= (
-    'define', NReturnTypeOpt, IDENT, '(', NFormalParamsOpt, ')',
-    NStatementBlock, 'end',
-    lambda return_type, name, params, body: FunctionDef(name, params, return_type, body)
+    KW_DEFINE, FUNCNAME, '(', NFormalParamsOpt, ')', NStatements, KW_END,
+    lambda name, params, body: FunctionDef(name, params, None, body)
 )
-
-NReturnTypeOpt |= lambda: None
-NReturnTypeOpt |= NType
+NFunctionDef |= (
+    KW_DEFINE, NType, FUNCNAME, '(', NFormalParamsOpt, ')', NStatements, KW_END,
+    lambda tp, name, params, body: FunctionDef(name, params, tp, body)
+)
 
 NFormalParamsOpt |= lambda: []
 NFormalParamsOpt |= NFormalParams
@@ -369,32 +301,54 @@ NFormalParamsOpt |= NFormalParams
 NFormalParams |= NFormalParam, lambda p: [p]
 NFormalParams |= NFormalParams, ',', NFormalParam, lambda ps, p: ps + [p]
 
-NFormalParam |= NType, IDENT, Parameter
+NFormalParam |= NType, IDENT, lambda tp, name: Parameter(name, tp)
 
 NType |= NPrimitiveType
-NType |= NType, 'array', ArrayType
+NType |= NType, KW_ARRAY, ArrayType
 
-NPrimitiveType |= 'int', lambda: PrimitiveType(BasicType.Int)
-NPrimitiveType |= 'char', lambda: PrimitiveType(BasicType.Char)
-NPrimitiveType |= 'bool', lambda: PrimitiveType(BasicType.Bool)
+NPrimitiveType |= KW_INT, lambda: Type.Int
+NPrimitiveType |= KW_CHAR, lambda: Type.Char
+NPrimitiveType |= KW_BOOL, lambda: Type.Bool
 
-NStatementBlock |= lambda: []
-NStatementBlock |= NStatements
-
+NStatements |= lambda: []
 NStatements |= NStatement, lambda st: [st]
 NStatements |= NStatements, ';', NStatement, lambda sts, st: sts + [st]
 
-NStatement |= NDeclStatement
-NStatement |= NAssignStatement
-NStatement |= NCallStatement
-NStatement |= NIfStatement
-NStatement |= NWhileStatement
-NStatement |= NForStatement
-NStatement |= NDoWhileStatement
-NStatement |= NReturnStatement
-NStatement |= NAssertStatement
+NStatement |= NType, NDeclItems, DeclStatement
+NStatement |= NExpr, ':=', NExpr, AssignStatement
+NStatement |= NFunctionCall, CallStatement
+NStatement |= (
+    KW_IF, NExpr, KW_THEN, NStatements, NElsifParts, NElsePartOpt, KW_END,
+    lambda cond, then_body, elsifs, else_body:
+        IfStatement([IfBranch(cond, then_body)] + elsifs, else_body)
+)
+NStatement |= KW_WHILE, NExpr, KW_DO, NStatements, KW_END, WhileStatement
 
-NDeclStatement |= NType, NDeclItems, DeclarationStatement
+NStatement |= (
+    IDENT, ':=', NExpr, KW_TO, NExpr, KW_DO, NStatements, KW_END,
+    lambda name, start, end, body:
+        ForStatement(None, name, start, end, ConstExpr('1', Type.Int), body)
+)
+NStatement |= (
+    IDENT, ':=', NExpr, KW_TO, NExpr, KW_STEP, NExpr, KW_DO, NStatements, KW_END,
+    lambda name, start, end, step, body:
+        ForStatement(None, name, start, end, step, body)
+)
+NStatement |= (
+    NType, IDENT, ':=', NExpr, KW_TO, NExpr, KW_DO, NStatements, KW_END,
+    lambda tp, name, start, end, body:
+        ForStatement(tp, name, start, end, ConstExpr('1', Type.Int), body)
+)
+NStatement |= (
+    NType, IDENT, ':=', NExpr, KW_TO, NExpr, KW_STEP, NExpr, KW_DO, NStatements, KW_END,
+    lambda tp, name, start, end, step, body:
+        ForStatement(tp, name, start, end, step, body)
+)
+
+NStatement |= KW_DO, NStatements, KW_WHILE, NExpr, DoWhileStatement
+NStatement |= KW_RETURN, lambda: ReturnStatement(None)
+NStatement |= KW_RETURN, NExpr, ReturnStatement
+NStatement |= KW_ASSERT, NExpr, AssertStatement
 
 NDeclItems |= NDeclItem, lambda item: [item]
 NDeclItems |= NDeclItems, ',', NDeclItem, lambda items, item: items + [item]
@@ -402,61 +356,35 @@ NDeclItems |= NDeclItems, ',', NDeclItem, lambda items, item: items + [item]
 NDeclItem |= IDENT, lambda name: DeclItem(name, None)
 NDeclItem |= IDENT, ':=', NExpr, DeclItem
 
-NAssignStatement |= NExpr, ':=', NExpr, AssignStatement
-
-NCallStatement |= NFunctionCall, CallStatement
-
-NIfStatement |= (
-    'if', NExpr, 'then', NStatementBlock, NElsifParts, NElsePartOpt, 'end',
-    lambda cond, then_body, elsifs, else_body:
-        IfStatement([IfBranch(cond, then_body)] + elsifs, else_body)
-)
-
 NElsifParts |= lambda: []
 NElsifParts |= (
-    NElsifParts, 'elsif', NExpr, 'then', NStatementBlock,
-    lambda parts, cond, body: parts + [IfBranch(cond, body)]
+    NElsifParts, KW_ELSIF, NExpr, KW_THEN, NStatements,
+    lambda branches, cond, body: branches + [IfBranch(cond, body)]
 )
 
-NElsePartOpt |= lambda: None
-NElsePartOpt |= 'else', NStatementBlock, lambda body: body
-
-NWhileStatement |= 'while', NExpr, 'do', NStatementBlock, 'end', WhileStatement
-
-NForInit |= IDENT, ':=', NExpr, lambda name, start: ForInit(None, name, start)
-NForInit |= NType, IDENT, ':=', NExpr, lambda var_type, name, start: ForInit(var_type, name, start)
-
-NStepOpt |= lambda: None
-NStepOpt |= 'step', NExpr, lambda expr: expr
-
-NForStatement |= (
-    NForInit, 'to', NExpr, NStepOpt, 'do', NStatementBlock, 'end',
-    lambda init, end_expr, step, body: ForStatement(init, end_expr, step, body)
-)
-
-NDoWhileStatement |= 'do', NStatementBlock, 'while', NExpr, lambda body, cond: DoWhileStatement(body, cond)
-
-NReturnStatement |= 'return', lambda: ReturnStatement(None)
-NReturnStatement |= 'return', NExpr, ReturnStatement
-
-NAssertStatement |= 'assert', NExpr, AssertStatement
+NElsePartOpt |= lambda: []
+NElsePartOpt |= KW_ELSE, NStatements, lambda body: body
 
 NExpr |= NOrExpr
 
 NOrExpr |= NAndExpr
 NOrExpr |= NOrExpr, NOrOp, NAndExpr, BinOpExpr
 
-NOrOp |= 'or', lambda: 'or'
-NOrOp |= 'xor', lambda: 'xor'
+NOrOp |= KW_OR, lambda: 'or'
+NOrOp |= KW_XOR, lambda: 'xor'
 
 NAndExpr |= NCmpExpr
-NAndExpr |= NAndExpr, 'and', NCmpExpr, lambda left, right: BinOpExpr(left, 'and', right)
+NAndExpr |= NAndExpr, KW_AND, NCmpExpr, lambda left, right: BinOpExpr(left, 'and', right)
 
 NCmpExpr |= NAddExpr
 NCmpExpr |= NAddExpr, NCmpOp, NAddExpr, BinOpExpr
 
-for op in ('=', '<>', '<', '>', '<=', '>='):
-    NCmpOp |= op, (lambda value=op: lambda: value)()
+NCmpOp |= '=', lambda: '='
+NCmpOp |= '<>', lambda: '<>'
+NCmpOp |= '<', lambda: '<'
+NCmpOp |= '>', lambda: '>'
+NCmpOp |= '<=', lambda: '<='
+NCmpOp |= '>=', lambda: '>='
 
 NAddExpr |= NMulExpr
 NAddExpr |= NAddExpr, NAddOp, NMulExpr, BinOpExpr
@@ -469,60 +397,55 @@ NMulExpr |= NMulExpr, NMulOp, NPowExpr, BinOpExpr
 
 NMulOp |= '*', lambda: '*'
 NMulOp |= '/', lambda: '/'
-NMulOp |= 'mod', lambda: 'mod'
+NMulOp |= KW_MOD, lambda: 'mod'
 
 NPowExpr |= NUnaryExpr
 NPowExpr |= NUnaryExpr, '**', NPowExpr, lambda left, right: BinOpExpr(left, '**', right)
 
 NUnaryExpr |= NPostfixExpr
 NUnaryExpr |= '-', NUnaryExpr, lambda expr: UnOpExpr('-', expr)
-NUnaryExpr |= 'not', NUnaryExpr, lambda expr: UnOpExpr('not', expr)
+NUnaryExpr |= KW_NOT, NUnaryExpr, lambda expr: UnOpExpr('not', expr)
 
 NPostfixExpr |= NPrimaryExpr
-NPostfixExpr |= NPostfixExpr, '[', NExpr, ']', ArrayAccessExpr
+NPostfixExpr |= NPostfixExpr, '[', NExpr, ']', IndexExpr
 
 NPrimaryExpr |= IDENT, VariableExpr
 NPrimaryExpr |= NConst
 NPrimaryExpr |= NFunctionCall
-NPrimaryExpr |= 'new', NType, '[', NExpr, ']', NewArrayExpr
+NPrimaryExpr |= KW_NEW, NType, '[', NExpr, ']', NewExpr
 NPrimaryExpr |= '(', NExpr, ')'
 
-NFunctionCall |= IDENT, '(', NActualParamsOpt, ')', FunctionCallExpr
+NFunctionCall |= FUNCNAME, '(', NActualParamsOpt, ')', CallExpr
 
 NActualParamsOpt |= lambda: []
 NActualParamsOpt |= NActualParams
 
 NActualParams |= NExpr, lambda expr: [expr]
-NActualParams |= NActualParams, ',', NExpr, lambda exprs, expr: exprs + [expr]
+NActualParams |= NActualParams, ',', NExpr, lambda args, expr: args + [expr]
 
-NConst |= INT_CONST, lambda value: ConstExpr(value, 'int')
-NConst |= CHAR_CONST, lambda value: ConstExpr(value, 'char')
-NConst |= NStringConst, lambda value: ConstExpr(value, 'string')
-NConst |= 'T', lambda: ConstExpr(True, 'bool')
-NConst |= 'F', lambda: ConstExpr(False, 'bool')
-NConst |= 'NULL', lambda: ConstExpr(None, 'null')
+NConst |= INT_CONST, lambda value: ConstExpr(value, Type.Int)
+NConst |= CHAR_CONST, lambda value: ConstExpr(value, Type.Char)
+NConst |= STRING_CONST, lambda value: ConstExpr(value, ArrayType(Type.Char))
+NConst |= KW_T, lambda: ConstExpr(True, Type.Bool)
+NConst |= KW_F, lambda: ConstExpr(False, Type.Bool)
+NConst |= KW_NULL, lambda: ConstExpr(None, None)
 
-NStringConst |= NStringSection
-NStringConst |= NStringConst, NStringSection, lambda value, section: value + section
+# ---------- Parser ----------
 
-NStringSection |= STRING_TEXT_SECTION
-NStringSection |= STRING_CONTROL_SECTION
+p = pe.Parser(NProgram, method=pe.EARLEY)
 
-parser = pe.Parser(NProgram)
+p.add_skipped_domain('\\s')
+p.add_skipped_domain('^\\*.*')
+p.add_skipped_domain('\\*\\*\\*.*')
 
-parser.add_skipped_domain(r'\s+')
-parser.add_skipped_domain(r'^\*[^\n]*')
-parser.add_skipped_domain(r'\*\*\*[^\n]*')
+# ---------- Main ----------
 
-
-if __name__ == '__main__':
-    for filename in sys.argv[1:]:
-        try:
-            with open(filename, encoding='utf-8') as f:
-                tree = parser.parse(f.read())
-                pprint(tree)
-        except pe.Error as e:
-            print(f'Ошибка {e.pos}: {e.message}')
-        except Exception as e:
-            print(e)
-
+for filename in sys.argv[1:]:
+    try:
+        with open(filename) as f:
+            tree = p.parse(f.read())
+            pprint(tree)
+    except pe.Error as e:
+        print(f'Ошибка {e.pos}: {e.message}')
+    except Exception as e:
+        print(e)
