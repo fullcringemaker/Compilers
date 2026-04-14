@@ -1,0 +1,19 @@
+define int Abs(int x)
+if x < 0 then
+    return -x
+elsif x = 0 then
+    return 0
+else
+    assert x > 0;
+    return x
+end
+end
+
+define int Main(char array array args)
+int a := 5, b := 2, c;
+c := Abs(a ** b - 20 / 2 mod 3);
+char c := args[0][1][2];
+*** Добавим синтаксический сахар - разрешим несколько индексов через запятую:
+c := args[0, 1, 2];
+return c
+end
