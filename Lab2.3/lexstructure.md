@@ -1,5 +1,6 @@
-## Лексическая структура
+### Лексическая структура
 
+```text
 KW_TOKENS    ::= tokens
 KW_IS        ::= is
 KW_START     ::= start
@@ -14,3 +15,5 @@ NUMBER       ::= [0-9]+
 
 COMMENT      ::= \(\*[\s\S]*?\*\)
 WHITESPACE   ::= [ \t\r\n]+
+
+```
