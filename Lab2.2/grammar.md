@@ -1,3 +1,6 @@
+### Конкретный синтаксис
+
+```text
 Program → FunctionDefs
 FunctionDefs → FunctionDef | FunctionDefs FunctionDef
 
@@ -86,3 +89,4 @@ Constant → INT_CONST
          | T
          | F
          | NULL
+```
