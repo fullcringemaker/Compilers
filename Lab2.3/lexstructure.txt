@@ -1,0 +1,16 @@
+## Лексическая структура
+
+KW_TOKENS    ::= tokens
+KW_IS        ::= is
+KW_START     ::= start
+
+LPAREN       ::= \(
+RPAREN       ::= \)
+COMMA        ::= ,
+DOT          ::= \.
+
+IDENT        ::= [A-Za-z]+
+NUMBER       ::= [0-9]+
+
+COMMENT      ::= \(\*[\s\S]*?\*\)
+WHITESPACE   ::= [ \t\r\n]+
