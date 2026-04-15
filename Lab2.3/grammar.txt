@@ -1,0 +1,29 @@
+GrammarDescription ::= TokensSection RulesSection StartSection
+
+TokensSection ::= TokensDecl TokensSection | ε
+
+TokensDecl ::= tokens SymbolList .
+
+SymbolList ::= Symbol SymbolListTail
+
+SymbolListTail ::= , Symbol SymbolListTail | ε
+
+RulesSection ::= Rule RulesSection | ε
+
+Rule ::= Symbol is RightPart RuleEnd
+
+RightPart ::= SymbolSequence | ε
+
+SymbolSequence ::= Symbol SymbolSequence | Symbol
+
+RuleEnd ::= . | ,
+
+StartSection ::= start Symbol .
+
+Symbol ::= ( Name )
+
+Name ::= NamePart NameTail
+
+NameTail ::= NamePart NameTail | ε
+
+NamePart ::= IDENT | NUMBER
