@@ -1,3 +1,6 @@
+Грамматика языка
+
+```text
 GrammarDescription ::= TokensSection RulesSection StartSection
 
 TokensSection ::= TokensDecl TokensSection | ε
@@ -27,3 +30,4 @@ Name ::= NamePart NameTail
 NameTail ::= NamePart NameTail | ε
 
 NamePart ::= IDENT | NUMBER
+```
