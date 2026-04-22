@@ -1,0 +1,854 @@
+digraph ParseTree {
+  rankdir=TB;
+  node [shape=box];
+  n0 [label="GrammarDescription"];
+  n1 [label="TokensSection"];
+  n2 [label="TokensDecl"];
+  n3 [label="KW_TOKENS: tokens"];
+  n2 -> n3;
+  n4 [label="SymbolList"];
+  n5 [label="Symbol"];
+  n6 [label="LPAREN: ("];
+  n5 -> n6;
+  n7 [label="Name"];
+  n8 [label="NamePart"];
+  n9 [label="IDENT: plus"];
+  n8 -> n9;
+  n7 -> n8;
+  n10 [label="NameTail"];
+  n11 [label="NamePart"];
+  n12 [label="IDENT: sign"];
+  n11 -> n12;
+  n10 -> n11;
+  n13 [label="NameTail"];
+  n14 [label="ε"];
+  n13 -> n14;
+  n10 -> n13;
+  { rank=same; n11 -> n13 [style=invis] }
+  n7 -> n10;
+  { rank=same; n8 -> n10 [style=invis] }
+  n5 -> n7;
+  n15 [label="RPAREN: )"];
+  n5 -> n15;
+  { rank=same; n6 -> n7 -> n15 [style=invis] }
+  n4 -> n5;
+  n16 [label="SymbolListTail"];
+  n17 [label="COMMA: ,"];
+  n16 -> n17;
+  n18 [label="Symbol"];
+  n19 [label="LPAREN: ("];
+  n18 -> n19;
+  n20 [label="Name"];
+  n21 [label="NamePart"];
+  n22 [label="IDENT: star"];
+  n21 -> n22;
+  n20 -> n21;
+  n23 [label="NameTail"];
+  n24 [label="ε"];
+  n23 -> n24;
+  n20 -> n23;
+  { rank=same; n21 -> n23 [style=invis] }
+  n18 -> n20;
+  n25 [label="RPAREN: )"];
+  n18 -> n25;
+  { rank=same; n19 -> n20 -> n25 [style=invis] }
+  n16 -> n18;
+  n26 [label="SymbolListTail"];
+  n27 [label="COMMA: ,"];
+  n26 -> n27;
+  n28 [label="Symbol"];
+  n29 [label="LPAREN: ("];
+  n28 -> n29;
+  n30 [label="Name"];
+  n31 [label="NamePart"];
+  n32 [label="IDENT: n"];
+  n31 -> n32;
+  n30 -> n31;
+  n33 [label="NameTail"];
+  n34 [label="ε"];
+  n33 -> n34;
+  n30 -> n33;
+  { rank=same; n31 -> n33 [style=invis] }
+  n28 -> n30;
+  n35 [label="RPAREN: )"];
+  n28 -> n35;
+  { rank=same; n29 -> n30 -> n35 [style=invis] }
+  n26 -> n28;
+  n36 [label="SymbolListTail"];
+  n37 [label="ε"];
+  n36 -> n37;
+  n26 -> n36;
+  { rank=same; n27 -> n28 -> n36 [style=invis] }
+  n16 -> n26;
+  { rank=same; n17 -> n18 -> n26 [style=invis] }
+  n4 -> n16;
+  { rank=same; n5 -> n16 [style=invis] }
+  n2 -> n4;
+  n38 [label="DOT: ."];
+  n2 -> n38;
+  { rank=same; n3 -> n4 -> n38 [style=invis] }
+  n1 -> n2;
+  n39 [label="TokensSection"];
+  n40 [label="TokensDecl"];
+  n41 [label="KW_TOKENS: tokens"];
+  n40 -> n41;
+  n42 [label="SymbolList"];
+  n43 [label="Symbol"];
+  n44 [label="LPAREN: ("];
+  n43 -> n44;
+  n45 [label="Name"];
+  n46 [label="NamePart"];
+  n47 [label="IDENT: left"];
+  n46 -> n47;
+  n45 -> n46;
+  n48 [label="NameTail"];
+  n49 [label="NamePart"];
+  n50 [label="IDENT: paren"];
+  n49 -> n50;
+  n48 -> n49;
+  n51 [label="NameTail"];
+  n52 [label="ε"];
+  n51 -> n52;
+  n48 -> n51;
+  { rank=same; n49 -> n51 [style=invis] }
+  n45 -> n48;
+  { rank=same; n46 -> n48 [style=invis] }
+  n43 -> n45;
+  n53 [label="RPAREN: )"];
+  n43 -> n53;
+  { rank=same; n44 -> n45 -> n53 [style=invis] }
+  n42 -> n43;
+  n54 [label="SymbolListTail"];
+  n55 [label="COMMA: ,"];
+  n54 -> n55;
+  n56 [label="Symbol"];
+  n57 [label="LPAREN: ("];
+  n56 -> n57;
+  n58 [label="Name"];
+  n59 [label="NamePart"];
+  n60 [label="IDENT: right"];
+  n59 -> n60;
+  n58 -> n59;
+  n61 [label="NameTail"];
+  n62 [label="NamePart"];
+  n63 [label="IDENT: paren"];
+  n62 -> n63;
+  n61 -> n62;
+  n64 [label="NameTail"];
+  n65 [label="ε"];
+  n64 -> n65;
+  n61 -> n64;
+  { rank=same; n62 -> n64 [style=invis] }
+  n58 -> n61;
+  { rank=same; n59 -> n61 [style=invis] }
+  n56 -> n58;
+  n66 [label="RPAREN: )"];
+  n56 -> n66;
+  { rank=same; n57 -> n58 -> n66 [style=invis] }
+  n54 -> n56;
+  n67 [label="SymbolListTail"];
+  n68 [label="ε"];
+  n67 -> n68;
+  n54 -> n67;
+  { rank=same; n55 -> n56 -> n67 [style=invis] }
+  n42 -> n54;
+  { rank=same; n43 -> n54 [style=invis] }
+  n40 -> n42;
+  n69 [label="DOT: ."];
+  n40 -> n69;
+  { rank=same; n41 -> n42 -> n69 [style=invis] }
+  n39 -> n40;
+  n70 [label="TokensSection"];
+  n71 [label="ε"];
+  n70 -> n71;
+  n39 -> n70;
+  { rank=same; n40 -> n70 [style=invis] }
+  n1 -> n39;
+  { rank=same; n2 -> n39 [style=invis] }
+  n0 -> n1;
+  n72 [label="RulesSection"];
+  n73 [label="Rule"];
+  n74 [label="Symbol"];
+  n75 [label="LPAREN: ("];
+  n74 -> n75;
+  n76 [label="Name"];
+  n77 [label="NamePart"];
+  n78 [label="IDENT: E"];
+  n77 -> n78;
+  n76 -> n77;
+  n79 [label="NameTail"];
+  n80 [label="ε"];
+  n79 -> n80;
+  n76 -> n79;
+  { rank=same; n77 -> n79 [style=invis] }
+  n74 -> n76;
+  n81 [label="RPAREN: )"];
+  n74 -> n81;
+  { rank=same; n75 -> n76 -> n81 [style=invis] }
+  n73 -> n74;
+  n82 [label="KW_IS: is"];
+  n73 -> n82;
+  n83 [label="RightPart"];
+  n84 [label="SymbolSequence"];
+  n85 [label="Symbol"];
+  n86 [label="LPAREN: ("];
+  n85 -> n86;
+  n87 [label="Name"];
+  n88 [label="NamePart"];
+  n89 [label="IDENT: T"];
+  n88 -> n89;
+  n87 -> n88;
+  n90 [label="NameTail"];
+  n91 [label="ε"];
+  n90 -> n91;
+  n87 -> n90;
+  { rank=same; n88 -> n90 [style=invis] }
+  n85 -> n87;
+  n92 [label="RPAREN: )"];
+  n85 -> n92;
+  { rank=same; n86 -> n87 -> n92 [style=invis] }
+  n84 -> n85;
+  n93 [label="SymbolSequenceTail"];
+  n94 [label="Symbol"];
+  n95 [label="LPAREN: ("];
+  n94 -> n95;
+  n96 [label="Name"];
+  n97 [label="NamePart"];
+  n98 [label="IDENT: E"];
+  n97 -> n98;
+  n96 -> n97;
+  n99 [label="NameTail"];
+  n100 [label="NamePart"];
+  n101 [label="NUMBER: 1"];
+  n100 -> n101;
+  n99 -> n100;
+  n102 [label="NameTail"];
+  n103 [label="ε"];
+  n102 -> n103;
+  n99 -> n102;
+  { rank=same; n100 -> n102 [style=invis] }
+  n96 -> n99;
+  { rank=same; n97 -> n99 [style=invis] }
+  n94 -> n96;
+  n104 [label="RPAREN: )"];
+  n94 -> n104;
+  { rank=same; n95 -> n96 -> n104 [style=invis] }
+  n93 -> n94;
+  n105 [label="SymbolSequenceTail"];
+  n106 [label="ε"];
+  n105 -> n106;
+  n93 -> n105;
+  { rank=same; n94 -> n105 [style=invis] }
+  n84 -> n93;
+  { rank=same; n85 -> n93 [style=invis] }
+  n83 -> n84;
+  n73 -> n83;
+  n107 [label="RuleEnd"];
+  n108 [label="DOT: ."];
+  n107 -> n108;
+  n73 -> n107;
+  { rank=same; n74 -> n82 -> n83 -> n107 [style=invis] }
+  n72 -> n73;
+  n109 [label="RulesSection"];
+  n110 [label="Rule"];
+  n111 [label="Symbol"];
+  n112 [label="LPAREN: ("];
+  n111 -> n112;
+  n113 [label="Name"];
+  n114 [label="NamePart"];
+  n115 [label="IDENT: E"];
+  n114 -> n115;
+  n113 -> n114;
+  n116 [label="NameTail"];
+  n117 [label="NamePart"];
+  n118 [label="NUMBER: 1"];
+  n117 -> n118;
+  n116 -> n117;
+  n119 [label="NameTail"];
+  n120 [label="ε"];
+  n119 -> n120;
+  n116 -> n119;
+  { rank=same; n117 -> n119 [style=invis] }
+  n113 -> n116;
+  { rank=same; n114 -> n116 [style=invis] }
+  n111 -> n113;
+  n121 [label="RPAREN: )"];
+  n111 -> n121;
+  { rank=same; n112 -> n113 -> n121 [style=invis] }
+  n110 -> n111;
+  n122 [label="KW_IS: is"];
+  n110 -> n122;
+  n123 [label="RightPart"];
+  n124 [label="SymbolSequence"];
+  n125 [label="Symbol"];
+  n126 [label="LPAREN: ("];
+  n125 -> n126;
+  n127 [label="Name"];
+  n128 [label="NamePart"];
+  n129 [label="IDENT: plus"];
+  n128 -> n129;
+  n127 -> n128;
+  n130 [label="NameTail"];
+  n131 [label="NamePart"];
+  n132 [label="IDENT: sign"];
+  n131 -> n132;
+  n130 -> n131;
+  n133 [label="NameTail"];
+  n134 [label="ε"];
+  n133 -> n134;
+  n130 -> n133;
+  { rank=same; n131 -> n133 [style=invis] }
+  n127 -> n130;
+  { rank=same; n128 -> n130 [style=invis] }
+  n125 -> n127;
+  n135 [label="RPAREN: )"];
+  n125 -> n135;
+  { rank=same; n126 -> n127 -> n135 [style=invis] }
+  n124 -> n125;
+  n136 [label="SymbolSequenceTail"];
+  n137 [label="Symbol"];
+  n138 [label="LPAREN: ("];
+  n137 -> n138;
+  n139 [label="Name"];
+  n140 [label="NamePart"];
+  n141 [label="IDENT: T"];
+  n140 -> n141;
+  n139 -> n140;
+  n142 [label="NameTail"];
+  n143 [label="ε"];
+  n142 -> n143;
+  n139 -> n142;
+  { rank=same; n140 -> n142 [style=invis] }
+  n137 -> n139;
+  n144 [label="RPAREN: )"];
+  n137 -> n144;
+  { rank=same; n138 -> n139 -> n144 [style=invis] }
+  n136 -> n137;
+  n145 [label="SymbolSequenceTail"];
+  n146 [label="Symbol"];
+  n147 [label="LPAREN: ("];
+  n146 -> n147;
+  n148 [label="Name"];
+  n149 [label="NamePart"];
+  n150 [label="IDENT: E"];
+  n149 -> n150;
+  n148 -> n149;
+  n151 [label="NameTail"];
+  n152 [label="NamePart"];
+  n153 [label="NUMBER: 1"];
+  n152 -> n153;
+  n151 -> n152;
+  n154 [label="NameTail"];
+  n155 [label="ε"];
+  n154 -> n155;
+  n151 -> n154;
+  { rank=same; n152 -> n154 [style=invis] }
+  n148 -> n151;
+  { rank=same; n149 -> n151 [style=invis] }
+  n146 -> n148;
+  n156 [label="RPAREN: )"];
+  n146 -> n156;
+  { rank=same; n147 -> n148 -> n156 [style=invis] }
+  n145 -> n146;
+  n157 [label="SymbolSequenceTail"];
+  n158 [label="ε"];
+  n157 -> n158;
+  n145 -> n157;
+  { rank=same; n146 -> n157 [style=invis] }
+  n136 -> n145;
+  { rank=same; n137 -> n145 [style=invis] }
+  n124 -> n136;
+  { rank=same; n125 -> n136 [style=invis] }
+  n123 -> n124;
+  n110 -> n123;
+  n159 [label="RuleEnd"];
+  n160 [label="COMMA: ,"];
+  n159 -> n160;
+  n110 -> n159;
+  { rank=same; n111 -> n122 -> n123 -> n159 [style=invis] }
+  n109 -> n110;
+  n161 [label="RulesSection"];
+  n162 [label="Rule"];
+  n163 [label="Symbol"];
+  n164 [label="LPAREN: ("];
+  n163 -> n164;
+  n165 [label="Name"];
+  n166 [label="NamePart"];
+  n167 [label="IDENT: E"];
+  n166 -> n167;
+  n165 -> n166;
+  n168 [label="NameTail"];
+  n169 [label="NamePart"];
+  n170 [label="NUMBER: 1"];
+  n169 -> n170;
+  n168 -> n169;
+  n171 [label="NameTail"];
+  n172 [label="ε"];
+  n171 -> n172;
+  n168 -> n171;
+  { rank=same; n169 -> n171 [style=invis] }
+  n165 -> n168;
+  { rank=same; n166 -> n168 [style=invis] }
+  n163 -> n165;
+  n173 [label="RPAREN: )"];
+  n163 -> n173;
+  { rank=same; n164 -> n165 -> n173 [style=invis] }
+  n162 -> n163;
+  n174 [label="KW_IS: is"];
+  n162 -> n174;
+  n175 [label="RightPart"];
+  n176 [label="ε"];
+  n175 -> n176;
+  n162 -> n175;
+  n177 [label="RuleEnd"];
+  n178 [label="DOT: ."];
+  n177 -> n178;
+  n162 -> n177;
+  { rank=same; n163 -> n174 -> n175 -> n177 [style=invis] }
+  n161 -> n162;
+  n179 [label="RulesSection"];
+  n180 [label="Rule"];
+  n181 [label="Symbol"];
+  n182 [label="LPAREN: ("];
+  n181 -> n182;
+  n183 [label="Name"];
+  n184 [label="NamePart"];
+  n185 [label="IDENT: T"];
+  n184 -> n185;
+  n183 -> n184;
+  n186 [label="NameTail"];
+  n187 [label="ε"];
+  n186 -> n187;
+  n183 -> n186;
+  { rank=same; n184 -> n186 [style=invis] }
+  n181 -> n183;
+  n188 [label="RPAREN: )"];
+  n181 -> n188;
+  { rank=same; n182 -> n183 -> n188 [style=invis] }
+  n180 -> n181;
+  n189 [label="KW_IS: is"];
+  n180 -> n189;
+  n190 [label="RightPart"];
+  n191 [label="SymbolSequence"];
+  n192 [label="Symbol"];
+  n193 [label="LPAREN: ("];
+  n192 -> n193;
+  n194 [label="Name"];
+  n195 [label="NamePart"];
+  n196 [label="IDENT: F"];
+  n195 -> n196;
+  n194 -> n195;
+  n197 [label="NameTail"];
+  n198 [label="ε"];
+  n197 -> n198;
+  n194 -> n197;
+  { rank=same; n195 -> n197 [style=invis] }
+  n192 -> n194;
+  n199 [label="RPAREN: )"];
+  n192 -> n199;
+  { rank=same; n193 -> n194 -> n199 [style=invis] }
+  n191 -> n192;
+  n200 [label="SymbolSequenceTail"];
+  n201 [label="Symbol"];
+  n202 [label="LPAREN: ("];
+  n201 -> n202;
+  n203 [label="Name"];
+  n204 [label="NamePart"];
+  n205 [label="IDENT: T"];
+  n204 -> n205;
+  n203 -> n204;
+  n206 [label="NameTail"];
+  n207 [label="NamePart"];
+  n208 [label="NUMBER: 1"];
+  n207 -> n208;
+  n206 -> n207;
+  n209 [label="NameTail"];
+  n210 [label="ε"];
+  n209 -> n210;
+  n206 -> n209;
+  { rank=same; n207 -> n209 [style=invis] }
+  n203 -> n206;
+  { rank=same; n204 -> n206 [style=invis] }
+  n201 -> n203;
+  n211 [label="RPAREN: )"];
+  n201 -> n211;
+  { rank=same; n202 -> n203 -> n211 [style=invis] }
+  n200 -> n201;
+  n212 [label="SymbolSequenceTail"];
+  n213 [label="ε"];
+  n212 -> n213;
+  n200 -> n212;
+  { rank=same; n201 -> n212 [style=invis] }
+  n191 -> n200;
+  { rank=same; n192 -> n200 [style=invis] }
+  n190 -> n191;
+  n180 -> n190;
+  n214 [label="RuleEnd"];
+  n215 [label="DOT: ."];
+  n214 -> n215;
+  n180 -> n214;
+  { rank=same; n181 -> n189 -> n190 -> n214 [style=invis] }
+  n179 -> n180;
+  n216 [label="RulesSection"];
+  n217 [label="Rule"];
+  n218 [label="Symbol"];
+  n219 [label="LPAREN: ("];
+  n218 -> n219;
+  n220 [label="Name"];
+  n221 [label="NamePart"];
+  n222 [label="IDENT: T"];
+  n221 -> n222;
+  n220 -> n221;
+  n223 [label="NameTail"];
+  n224 [label="NamePart"];
+  n225 [label="NUMBER: 1"];
+  n224 -> n225;
+  n223 -> n224;
+  n226 [label="NameTail"];
+  n227 [label="ε"];
+  n226 -> n227;
+  n223 -> n226;
+  { rank=same; n224 -> n226 [style=invis] }
+  n220 -> n223;
+  { rank=same; n221 -> n223 [style=invis] }
+  n218 -> n220;
+  n228 [label="RPAREN: )"];
+  n218 -> n228;
+  { rank=same; n219 -> n220 -> n228 [style=invis] }
+  n217 -> n218;
+  n229 [label="KW_IS: is"];
+  n217 -> n229;
+  n230 [label="RightPart"];
+  n231 [label="SymbolSequence"];
+  n232 [label="Symbol"];
+  n233 [label="LPAREN: ("];
+  n232 -> n233;
+  n234 [label="Name"];
+  n235 [label="NamePart"];
+  n236 [label="IDENT: star"];
+  n235 -> n236;
+  n234 -> n235;
+  n237 [label="NameTail"];
+  n238 [label="ε"];
+  n237 -> n238;
+  n234 -> n237;
+  { rank=same; n235 -> n237 [style=invis] }
+  n232 -> n234;
+  n239 [label="RPAREN: )"];
+  n232 -> n239;
+  { rank=same; n233 -> n234 -> n239 [style=invis] }
+  n231 -> n232;
+  n240 [label="SymbolSequenceTail"];
+  n241 [label="Symbol"];
+  n242 [label="LPAREN: ("];
+  n241 -> n242;
+  n243 [label="Name"];
+  n244 [label="NamePart"];
+  n245 [label="IDENT: F"];
+  n244 -> n245;
+  n243 -> n244;
+  n246 [label="NameTail"];
+  n247 [label="ε"];
+  n246 -> n247;
+  n243 -> n246;
+  { rank=same; n244 -> n246 [style=invis] }
+  n241 -> n243;
+  n248 [label="RPAREN: )"];
+  n241 -> n248;
+  { rank=same; n242 -> n243 -> n248 [style=invis] }
+  n240 -> n241;
+  n249 [label="SymbolSequenceTail"];
+  n250 [label="Symbol"];
+  n251 [label="LPAREN: ("];
+  n250 -> n251;
+  n252 [label="Name"];
+  n253 [label="NamePart"];
+  n254 [label="IDENT: T"];
+  n253 -> n254;
+  n252 -> n253;
+  n255 [label="NameTail"];
+  n256 [label="NamePart"];
+  n257 [label="NUMBER: 1"];
+  n256 -> n257;
+  n255 -> n256;
+  n258 [label="NameTail"];
+  n259 [label="ε"];
+  n258 -> n259;
+  n255 -> n258;
+  { rank=same; n256 -> n258 [style=invis] }
+  n252 -> n255;
+  { rank=same; n253 -> n255 [style=invis] }
+  n250 -> n252;
+  n260 [label="RPAREN: )"];
+  n250 -> n260;
+  { rank=same; n251 -> n252 -> n260 [style=invis] }
+  n249 -> n250;
+  n261 [label="SymbolSequenceTail"];
+  n262 [label="ε"];
+  n261 -> n262;
+  n249 -> n261;
+  { rank=same; n250 -> n261 [style=invis] }
+  n240 -> n249;
+  { rank=same; n241 -> n249 [style=invis] }
+  n231 -> n240;
+  { rank=same; n232 -> n240 [style=invis] }
+  n230 -> n231;
+  n217 -> n230;
+  n263 [label="RuleEnd"];
+  n264 [label="COMMA: ,"];
+  n263 -> n264;
+  n217 -> n263;
+  { rank=same; n218 -> n229 -> n230 -> n263 [style=invis] }
+  n216 -> n217;
+  n265 [label="RulesSection"];
+  n266 [label="Rule"];
+  n267 [label="Symbol"];
+  n268 [label="LPAREN: ("];
+  n267 -> n268;
+  n269 [label="Name"];
+  n270 [label="NamePart"];
+  n271 [label="IDENT: T"];
+  n270 -> n271;
+  n269 -> n270;
+  n272 [label="NameTail"];
+  n273 [label="NamePart"];
+  n274 [label="NUMBER: 1"];
+  n273 -> n274;
+  n272 -> n273;
+  n275 [label="NameTail"];
+  n276 [label="ε"];
+  n275 -> n276;
+  n272 -> n275;
+  { rank=same; n273 -> n275 [style=invis] }
+  n269 -> n272;
+  { rank=same; n270 -> n272 [style=invis] }
+  n267 -> n269;
+  n277 [label="RPAREN: )"];
+  n267 -> n277;
+  { rank=same; n268 -> n269 -> n277 [style=invis] }
+  n266 -> n267;
+  n278 [label="KW_IS: is"];
+  n266 -> n278;
+  n279 [label="RightPart"];
+  n280 [label="ε"];
+  n279 -> n280;
+  n266 -> n279;
+  n281 [label="RuleEnd"];
+  n282 [label="DOT: ."];
+  n281 -> n282;
+  n266 -> n281;
+  { rank=same; n267 -> n278 -> n279 -> n281 [style=invis] }
+  n265 -> n266;
+  n283 [label="RulesSection"];
+  n284 [label="Rule"];
+  n285 [label="Symbol"];
+  n286 [label="LPAREN: ("];
+  n285 -> n286;
+  n287 [label="Name"];
+  n288 [label="NamePart"];
+  n289 [label="IDENT: F"];
+  n288 -> n289;
+  n287 -> n288;
+  n290 [label="NameTail"];
+  n291 [label="ε"];
+  n290 -> n291;
+  n287 -> n290;
+  { rank=same; n288 -> n290 [style=invis] }
+  n285 -> n287;
+  n292 [label="RPAREN: )"];
+  n285 -> n292;
+  { rank=same; n286 -> n287 -> n292 [style=invis] }
+  n284 -> n285;
+  n293 [label="KW_IS: is"];
+  n284 -> n293;
+  n294 [label="RightPart"];
+  n295 [label="SymbolSequence"];
+  n296 [label="Symbol"];
+  n297 [label="LPAREN: ("];
+  n296 -> n297;
+  n298 [label="Name"];
+  n299 [label="NamePart"];
+  n300 [label="IDENT: n"];
+  n299 -> n300;
+  n298 -> n299;
+  n301 [label="NameTail"];
+  n302 [label="ε"];
+  n301 -> n302;
+  n298 -> n301;
+  { rank=same; n299 -> n301 [style=invis] }
+  n296 -> n298;
+  n303 [label="RPAREN: )"];
+  n296 -> n303;
+  { rank=same; n297 -> n298 -> n303 [style=invis] }
+  n295 -> n296;
+  n304 [label="SymbolSequenceTail"];
+  n305 [label="ε"];
+  n304 -> n305;
+  n295 -> n304;
+  { rank=same; n296 -> n304 [style=invis] }
+  n294 -> n295;
+  n284 -> n294;
+  n306 [label="RuleEnd"];
+  n307 [label="COMMA: ,"];
+  n306 -> n307;
+  n284 -> n306;
+  { rank=same; n285 -> n293 -> n294 -> n306 [style=invis] }
+  n283 -> n284;
+  n308 [label="RulesSection"];
+  n309 [label="Rule"];
+  n310 [label="Symbol"];
+  n311 [label="LPAREN: ("];
+  n310 -> n311;
+  n312 [label="Name"];
+  n313 [label="NamePart"];
+  n314 [label="IDENT: F"];
+  n313 -> n314;
+  n312 -> n313;
+  n315 [label="NameTail"];
+  n316 [label="ε"];
+  n315 -> n316;
+  n312 -> n315;
+  { rank=same; n313 -> n315 [style=invis] }
+  n310 -> n312;
+  n317 [label="RPAREN: )"];
+  n310 -> n317;
+  { rank=same; n311 -> n312 -> n317 [style=invis] }
+  n309 -> n310;
+  n318 [label="KW_IS: is"];
+  n309 -> n318;
+  n319 [label="RightPart"];
+  n320 [label="SymbolSequence"];
+  n321 [label="Symbol"];
+  n322 [label="LPAREN: ("];
+  n321 -> n322;
+  n323 [label="Name"];
+  n324 [label="NamePart"];
+  n325 [label="IDENT: left"];
+  n324 -> n325;
+  n323 -> n324;
+  n326 [label="NameTail"];
+  n327 [label="NamePart"];
+  n328 [label="IDENT: paren"];
+  n327 -> n328;
+  n326 -> n327;
+  n329 [label="NameTail"];
+  n330 [label="ε"];
+  n329 -> n330;
+  n326 -> n329;
+  { rank=same; n327 -> n329 [style=invis] }
+  n323 -> n326;
+  { rank=same; n324 -> n326 [style=invis] }
+  n321 -> n323;
+  n331 [label="RPAREN: )"];
+  n321 -> n331;
+  { rank=same; n322 -> n323 -> n331 [style=invis] }
+  n320 -> n321;
+  n332 [label="SymbolSequenceTail"];
+  n333 [label="Symbol"];
+  n334 [label="LPAREN: ("];
+  n333 -> n334;
+  n335 [label="Name"];
+  n336 [label="NamePart"];
+  n337 [label="IDENT: E"];
+  n336 -> n337;
+  n335 -> n336;
+  n338 [label="NameTail"];
+  n339 [label="ε"];
+  n338 -> n339;
+  n335 -> n338;
+  { rank=same; n336 -> n338 [style=invis] }
+  n333 -> n335;
+  n340 [label="RPAREN: )"];
+  n333 -> n340;
+  { rank=same; n334 -> n335 -> n340 [style=invis] }
+  n332 -> n333;
+  n341 [label="SymbolSequenceTail"];
+  n342 [label="Symbol"];
+  n343 [label="LPAREN: ("];
+  n342 -> n343;
+  n344 [label="Name"];
+  n345 [label="NamePart"];
+  n346 [label="IDENT: right"];
+  n345 -> n346;
+  n344 -> n345;
+  n347 [label="NameTail"];
+  n348 [label="NamePart"];
+  n349 [label="IDENT: paren"];
+  n348 -> n349;
+  n347 -> n348;
+  n350 [label="NameTail"];
+  n351 [label="ε"];
+  n350 -> n351;
+  n347 -> n350;
+  { rank=same; n348 -> n350 [style=invis] }
+  n344 -> n347;
+  { rank=same; n345 -> n347 [style=invis] }
+  n342 -> n344;
+  n352 [label="RPAREN: )"];
+  n342 -> n352;
+  { rank=same; n343 -> n344 -> n352 [style=invis] }
+  n341 -> n342;
+  n353 [label="SymbolSequenceTail"];
+  n354 [label="ε"];
+  n353 -> n354;
+  n341 -> n353;
+  { rank=same; n342 -> n353 [style=invis] }
+  n332 -> n341;
+  { rank=same; n333 -> n341 [style=invis] }
+  n320 -> n332;
+  { rank=same; n321 -> n332 [style=invis] }
+  n319 -> n320;
+  n309 -> n319;
+  n355 [label="RuleEnd"];
+  n356 [label="DOT: ."];
+  n355 -> n356;
+  n309 -> n355;
+  { rank=same; n310 -> n318 -> n319 -> n355 [style=invis] }
+  n308 -> n309;
+  n357 [label="RulesSection"];
+  n358 [label="ε"];
+  n357 -> n358;
+  n308 -> n357;
+  { rank=same; n309 -> n357 [style=invis] }
+  n283 -> n308;
+  { rank=same; n284 -> n308 [style=invis] }
+  n265 -> n283;
+  { rank=same; n266 -> n283 [style=invis] }
+  n216 -> n265;
+  { rank=same; n217 -> n265 [style=invis] }
+  n179 -> n216;
+  { rank=same; n180 -> n216 [style=invis] }
+  n161 -> n179;
+  { rank=same; n162 -> n179 [style=invis] }
+  n109 -> n161;
+  { rank=same; n110 -> n161 [style=invis] }
+  n72 -> n109;
+  { rank=same; n73 -> n109 [style=invis] }
+  n0 -> n72;
+  n359 [label="StartSection"];
+  n360 [label="KW_START: start"];
+  n359 -> n360;
+  n361 [label="Symbol"];
+  n362 [label="LPAREN: ("];
+  n361 -> n362;
+  n363 [label="Name"];
+  n364 [label="NamePart"];
+  n365 [label="IDENT: E"];
+  n364 -> n365;
+  n363 -> n364;
+  n366 [label="NameTail"];
+  n367 [label="ε"];
+  n366 -> n367;
+  n363 -> n366;
+  { rank=same; n364 -> n366 [style=invis] }
+  n361 -> n363;
+  n368 [label="RPAREN: )"];
+  n361 -> n368;
+  { rank=same; n362 -> n363 -> n368 [style=invis] }
+  n359 -> n361;
+  n369 [label="DOT: ."];
+  n359 -> n369;
+  { rank=same; n360 -> n361 -> n369 [style=invis] }
+  n0 -> n359;
+  { rank=same; n1 -> n72 -> n359 [style=invis] }
+}
