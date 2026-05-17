@@ -1,0 +1,28 @@
+tokens (KW_TOKENS), (KW_IS), (KW_START).
+tokens (LPAREN), (RPAREN), (COMMA), (DOT).
+tokens (IDENT), (NUMBER).
+(GrammarDescription) is (TokensSection) (RulesSection) (StartSection).
+(TokensSection) is (TokensDecl) (TokensSection),
+(TokensSection) is .
+(TokensDecl) is (KW_TOKENS) (SymbolList) (DOT).
+(SymbolList) is (Symbol) (SymbolListTail).
+(SymbolListTail) is (COMMA) (Symbol) (SymbolListTail),
+(SymbolListTail) is .
+(RulesSection) is (Rule) (RulesSection),
+(RulesSection) is .
+(Rule) is (Symbol) (KW_IS) (RightPart) (RuleEnd).
+(RightPart) is (SymbolSequence),
+(RightPart) is .
+(SymbolSequence) is (Symbol) (SymbolSequenceTail).
+(SymbolSequenceTail) is (Symbol) (SymbolSequenceTail),
+(SymbolSequenceTail) is .
+(RuleEnd) is (DOT),
+(RuleEnd) is (COMMA).
+(StartSection) is (KW_START) (Symbol) (DOT).
+(Symbol) is (LPAREN) (Name) (RPAREN).
+(Name) is (NamePart) (NameTail).
+(NameTail) is (NamePart) (NameTail),
+(NameTail) is .
+(NamePart) is (IDENT),
+(NamePart) is (NUMBER).
+start (GrammarDescription).
