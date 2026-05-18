@@ -1,31 +1,45 @@
-from pprint import pformat
-from grammar_lang.model import EOF_SYMBOL, EPSILON
+from grammar_lang.model import EOF_SYMBOL
 
-def sorted_dict_of_sets(mapping):
-    return {key: sorted(value) for key, value in sorted(mapping.items())}
+def format_list(values):
+    if len(values) == 0:
+        return "[]"
+    parts = []
+    for value in values:
+        parts.append(repr(value))
+    return "[" + ", ".join(parts) + "]" 
 
-def sorted_parse_table(table):
-    result = {}
+def format_set(values):
+    if len(values) == 0:
+        return "set()"
+    parts = []
+    for value in sorted(values):
+        parts.append(repr(value))
+    return "{" + ", ".join(parts) + "}"
+
+def format_parse_table(table):
+    lines = []
+    lines.append("{")
     for nonterminal in sorted(table.keys()):
-        result[nonterminal] = {}
+        lines.append("    {0}: {{".format(repr(nonterminal)))
         for terminal in sorted(table[nonterminal].keys()):
-            result[nonterminal][terminal] = list(table[nonterminal][terminal])
-    return result
+            production = table[nonterminal][terminal]
+            lines.append(
+                "        {0}: {1},".format(
+                    repr(terminal),
+                    format_list(production)
+                )
+            )
+        lines.append("    },")
+    lines.append("}")
+    return "\n".join(lines)
 
 def make_python_table_code(grammar, first, follow, parse_table):
-    terminals = sorted(set(grammar.terminals) | {EOF_SYMBOL})
-    nonterminals = sorted(grammar.nonterminals)
-    productions = [(p.left, list(p.right)) for p in grammar.productions]
-
+    terminals = set(grammar.terminals)
+    terminals.add(EOF_SYMBOL)
     lines = []
-    lines.append("EPSILON = {0}".format(repr(EPSILON)))
     lines.append("START_SYMBOL = {0}".format(repr(grammar.start_symbol)))
-    lines.append("TERMINALS = {0}".format(pformat(set(terminals), width=100, sort_dicts=True)))
-    lines.append("NONTERMINALS = {0}".format(pformat(set(nonterminals), width=100, sort_dicts=True)))
-    lines.append("PRODUCTIONS = {0}".format(pformat(productions, width=100, sort_dicts=True)))
-    lines.append("FIRST = {0}".format(pformat(sorted_dict_of_sets(first), width=100, sort_dicts=True)))
-    lines.append("FOLLOW = {0}".format(pformat(sorted_dict_of_sets(follow), width=100, sort_dicts=True)))
-    lines.append("PARSE_TABLE = {0}".format(pformat(sorted_parse_table(parse_table), width=120, sort_dicts=True)))
+    lines.append("TERMINALS = {0}".format(format_set(terminals)))
+    lines.append("PARSE_TABLE = {0}".format(format_parse_table(parse_table)))
     lines.append("")
     return "\n".join(lines)
 
