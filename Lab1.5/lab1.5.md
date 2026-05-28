@@ -16,7 +16,7 @@
 
 # Реализация
 
-```lex
+```flex
 %option noyywrap bison-bridge bison-locations
 
 %{
