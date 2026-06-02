@@ -368,7 +368,6 @@ class FunctionSymbol:
     return_type: typing.Optional[typing.Any]
     params: list
     pos: pe.Position
-    node: typing.Any
 
 
 @dataclass
@@ -434,36 +433,42 @@ class Statement(abc.ABC):
     def check(self, context):
         pass
 
-
 class Expr(abc.ABC):
-    type = None
-    coord = None
-
     @abc.abstractmethod
     def check(self, context):
         pass
 
     def error_pos(self):
-        if self.coord is not None:
-            return self.coord.start
+        coord = getattr(self, 'coord', None)
+        if coord is not None:
+            return coord.start
         return pe.Position()
 
     def check_lvalue(self, context):
         self.check(context)
         raise NotLValue(self.error_pos())
-
+    
 
 @dataclass
 class StatementBlock:
     statements: list
+    coord: pe.Fragment = None
     local_table: SymbolTable = field(default_factory=SymbolTable, init=False)
+
+    @pe.ExAction
+    def create(attrs, coords, res_coord):
+        if len(attrs) == 0:
+            return StatementBlock([], res_coord)
+
+        statements, = attrs
+        return StatementBlock(statements, res_coord)
 
     def check(self, context):
         self.local_table = SymbolTable()
         block_context = context.make_child(self.local_table)
+
         for statement in self.statements:
             statement.check(block_context)
-
 
 @dataclass
 class Program:
@@ -478,19 +483,24 @@ class Program:
 
     def check(self):
         self.function_table = {}
+        self.local_table = SymbolTable()
+
         for function in self.functions:
-            if function.name in self.function_table:
+            if self.local_table.contains_symbol(function.name):
                 raise DuplicateFunction(function.name_coord, function.name)
-            self.function_table[function.name] = FunctionSymbol(
+
+            symbol = FunctionSymbol(
                 function.name,
                 function.return_type,
                 [param.type for param in function.params],
                 function.name_coord,
-                function,
             )
 
-        self.local_table = SymbolTable()
+            self.local_table.add_symbol(symbol)
+            self.function_table[function.name] = symbol
+
         context = SemanticContext(self.function_table, self.local_table, None)
+
         for function in self.functions:
             function.check(context)
 
@@ -1178,8 +1188,8 @@ NPrimitiveType |= KW_INT, lambda: Type.Int
 NPrimitiveType |= KW_CHAR, lambda: Type.Char
 NPrimitiveType |= KW_BOOL, lambda: Type.Bool
 
-NStatementBlock |= lambda: StatementBlock([])
-NStatementBlock |= NStatements, lambda statements: StatementBlock(statements)
+NStatementBlock |= StatementBlock.create
+NStatementBlock |= NStatements, StatementBlock.create
 
 NStatements |= NStatement, lambda st: [st]
 NStatements |= NStatements, ';', NStatement, lambda sts, st: sts + [st]
