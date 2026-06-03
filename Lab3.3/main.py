@@ -6,7 +6,6 @@ import parser_edsl as pe
 import re
 import sys
 
-
 # ---------- Узлы типов ----------
 
 class Type(enum.Enum):
@@ -14,22 +13,18 @@ class Type(enum.Enum):
     Char = 'char'
     Bool = 'bool'
 
-
 @dataclass(frozen=True)
 class ArrayType:
     type: typing.Any
-
 
 @dataclass
 class NoReturnType:
     pass
 
-
 # ---------- Семантические ошибки ----------
 
 class SemanticError(pe.Error):
     pass
-
 
 class DuplicateFunction(SemanticError):
     def __init__(self, pos, name):
@@ -40,7 +35,6 @@ class DuplicateFunction(SemanticError):
     def message(self):
         return f'Повторное определение функции {self.name}'
 
-
 class DuplicateVariable(SemanticError):
     def __init__(self, pos, name):
         self.pos = pos
@@ -49,7 +43,6 @@ class DuplicateVariable(SemanticError):
     @property
     def message(self):
         return f'Повторное объявление переменной {self.name}'
-
 
 class UnknownFunction(SemanticError):
     def __init__(self, pos, name):
@@ -60,7 +53,6 @@ class UnknownFunction(SemanticError):
     def message(self):
         return f'Необъявленная функция {self.name}'
 
-
 class UnknownVariable(SemanticError):
     def __init__(self, pos, name):
         self.pos = pos
@@ -69,7 +61,6 @@ class UnknownVariable(SemanticError):
     @property
     def message(self):
         return f'Необъявленная переменная {self.name}'
-
 
 class BadArgumentCount(SemanticError):
     def __init__(self, pos, name, expected, actual):
@@ -81,7 +72,6 @@ class BadArgumentCount(SemanticError):
     @property
     def message(self):
         return f'Функция {self.name} ожидает {self.expected} аргументов, получено {self.actual}'
-
 
 class BadArgumentType(SemanticError):
     def __init__(self, pos, name, number, expected, actual):
@@ -98,7 +88,6 @@ class BadArgumentType(SemanticError):
             f'ожидалось {type_to_str(self.expected)}, получено {type_to_str(self.actual)}'
         )
 
-
 class ProcedureUsedAsExpression(SemanticError):
     def __init__(self, pos, name):
         self.pos = pos
@@ -108,7 +97,6 @@ class ProcedureUsedAsExpression(SemanticError):
     def message(self):
         return f'Функция {self.name} не возвращает значение'
 
-
 class FunctionUsedAsStatement(SemanticError):
     def __init__(self, pos, name):
         self.pos = pos
@@ -117,7 +105,6 @@ class FunctionUsedAsStatement(SemanticError):
     @property
     def message(self):
         return f'Функция {self.name} возвращает значение и не может использоваться как оператор вызова'
-
 
 class BadBinaryType(SemanticError):
     def __init__(self, pos, left, op, right):
@@ -130,7 +117,6 @@ class BadBinaryType(SemanticError):
     def message(self):
         return f'Недопустимые типы операндов: {type_to_str(self.left)} {self.op} {type_to_str(self.right)}'
 
-
 class BadUnaryType(SemanticError):
     def __init__(self, pos, op, type_):
         self.pos = pos
@@ -140,7 +126,6 @@ class BadUnaryType(SemanticError):
     @property
     def message(self):
         return f'Недопустимый тип операнда: {self.op} {type_to_str(self.type)}'
-
 
 class BadAssignmentType(SemanticError):
     def __init__(self, pos, target, source):
@@ -152,7 +137,6 @@ class BadAssignmentType(SemanticError):
     def message(self):
         return f'Несовместимые типы присваивания: {type_to_str(self.target)} := {type_to_str(self.source)}'
 
-
 class BadConditionType(SemanticError):
     def __init__(self, pos, type_):
         self.pos = pos
@@ -162,7 +146,6 @@ class BadConditionType(SemanticError):
     def message(self):
         return f'Условие имеет тип {type_to_str(self.type)} вместо bool'
 
-
 class NotLValue(SemanticError):
     def __init__(self, pos):
         self.pos = pos
@@ -170,7 +153,6 @@ class NotLValue(SemanticError):
     @property
     def message(self):
         return 'Левая часть присваивания не является изменяемой ячейкой'
-
 
 class ImmutableVariable(SemanticError):
     def __init__(self, pos, name):
@@ -181,7 +163,6 @@ class ImmutableVariable(SemanticError):
     def message(self):
         return f'Переменная {self.name} является неизменяемой'
 
-
 class BadIndexing(SemanticError):
     def __init__(self, pos, type_):
         self.pos = pos
@@ -190,7 +171,6 @@ class BadIndexing(SemanticError):
     @property
     def message(self):
         return f'Индексирование применено не к массиву, а к {type_to_str(self.type)}'
-
 
 class BadIndexType(SemanticError):
     def __init__(self, pos, type_):
@@ -201,7 +181,6 @@ class BadIndexType(SemanticError):
     def message(self):
         return f'Индекс массива имеет тип {type_to_str(self.type)} вместо int или char'
 
-
 class BadNewSizeType(SemanticError):
     def __init__(self, pos, type_):
         self.pos = pos
@@ -210,7 +189,6 @@ class BadNewSizeType(SemanticError):
     @property
     def message(self):
         return f'Размер массива имеет тип {type_to_str(self.type)} вместо int'
-
 
 class BadForVariableType(SemanticError):
     def __init__(self, pos, type_):
@@ -221,7 +199,6 @@ class BadForVariableType(SemanticError):
     def message(self):
         return f'Переменная цикла имеет тип {type_to_str(self.type)} вместо int или char'
 
-
 class BadForStepType(SemanticError):
     def __init__(self, pos, type_):
         self.pos = pos
@@ -230,7 +207,6 @@ class BadForStepType(SemanticError):
     @property
     def message(self):
         return f'Шаг цикла имеет тип {type_to_str(self.type)} вместо int'
-
 
 class BadReturnType(SemanticError):
     def __init__(self, pos, expected, actual):
@@ -242,7 +218,6 @@ class BadReturnType(SemanticError):
     def message(self):
         return f'Несовместимый тип return: ожидалось {type_to_str(self.expected)}, получено {type_to_str(self.actual)}'
 
-
 class MissingReturnValue(SemanticError):
     def __init__(self, pos, expected):
         self.pos = pos
@@ -252,7 +227,6 @@ class MissingReturnValue(SemanticError):
     def message(self):
         return f'Оператор return должен возвращать значение типа {type_to_str(self.expected)}'
 
-
 class UnexpectedReturnValue(SemanticError):
     def __init__(self, pos, actual):
         self.pos = pos
@@ -261,7 +235,6 @@ class UnexpectedReturnValue(SemanticError):
     @property
     def message(self):
         return f'Процедура не должна возвращать значение типа {type_to_str(self.actual)}'
-
 
 # ---------- Проверка типов ----------
 
@@ -274,14 +247,11 @@ def type_to_str(type_):
         return f'{type_to_str(type_.type)} array'
     return str(type_)
 
-
 def same_type(left, right):
     return left == right
 
-
 def is_array_type(type_):
     return isinstance(type_, ArrayType)
-
 
 def assignment_compatible(target, source):
     if same_type(target, source):
@@ -291,7 +261,6 @@ def assignment_compatible(target, source):
     if is_array_type(target) and source is None:
         return True
     return False
-
 
 def binary_result_type(left, op, right):
     if op == '+':
@@ -351,7 +320,6 @@ def binary_result_type(left, op, right):
 
     return None
 
-
 # ---------- Символы и локальные таблицы символов ----------
 
 @dataclass
@@ -361,14 +329,12 @@ class VariableSymbol:
     pos: pe.Position
     mutable: bool
 
-
 @dataclass
 class FunctionSymbol:
     name: str
     return_type: typing.Optional[typing.Any]
     params: list
     pos: pe.Position
-
 
 @dataclass
 class SymbolTable:
@@ -391,16 +357,17 @@ class SymbolTable:
     def find_symbol(self, name):
         if name in self.symbols:
             return self.symbols[name]
+
         for table in self.open_scopes:
             found = table.find_symbol(name)
             if found is not None:
                 return found
-        return None
 
+        return None
 
 @dataclass
 class SemanticContext:
-    functions: dict
+    functions: SymbolTable
     scope: SymbolTable
     return_type: typing.Optional[typing.Any]
 
@@ -411,7 +378,6 @@ class SemanticContext:
     def make_child(self, local_table):
         local_table.add_open_scope(self.scope)
         return SemanticContext(self.functions, local_table, self.return_type)
-
 
 # ---------- Узлы абстрактного синтаксического дерева ----------
 
@@ -426,7 +392,6 @@ class Parameter:
         type_, name = attrs
         ctype, cname = coords
         return Parameter(name, cname.start, type_)
-
 
 class Statement(abc.ABC):
     @abc.abstractmethod
@@ -447,21 +412,11 @@ class Expr(abc.ABC):
     def check_lvalue(self, context):
         self.check(context)
         raise NotLValue(self.error_pos())
-    
 
 @dataclass
 class StatementBlock:
     statements: list
-    coord: pe.Fragment = None
-    local_table: SymbolTable = field(default_factory=SymbolTable, init=False)
-
-    @pe.ExAction
-    def create(attrs, coords, res_coord):
-        if len(attrs) == 0:
-            return StatementBlock([], res_coord)
-
-        statements, = attrs
-        return StatementBlock(statements, res_coord)
+    local_table: typing.Optional[SymbolTable] = field(default=None, init=False)
 
     def check(self, context):
         self.local_table = SymbolTable()
@@ -473,16 +428,9 @@ class StatementBlock:
 @dataclass
 class Program:
     functions: list
-    function_table: dict = field(default_factory=dict, init=False)
-    local_table: SymbolTable = field(default_factory=SymbolTable, init=False)
-
-    @pe.ExAction
-    def create(attrs, coords, res_coord):
-        functions, = attrs
-        return Program(functions)
+    local_table: typing.Optional[SymbolTable] = field(default=None, init=False)
 
     def check(self):
-        self.function_table = {}
         self.local_table = SymbolTable()
 
         for function in self.functions:
@@ -495,15 +443,12 @@ class Program:
                 [param.type for param in function.params],
                 function.name_coord,
             )
-
             self.local_table.add_symbol(symbol)
-            self.function_table[function.name] = symbol
 
-        context = SemanticContext(self.function_table, self.local_table, None)
+        context = SemanticContext(self.local_table, self.local_table, None)
 
         for function in self.functions:
             function.check(context)
-
 
 @dataclass
 class FunctionHeader:
@@ -516,10 +461,11 @@ class FunctionHeader:
     def create(attrs, coords, res_coord):
         return_type, name, params = attrs
         creturn, cname, clparen, cparams, crparen = coords
+
         if isinstance(return_type, NoReturnType):
             return_type = None
-        return FunctionHeader(return_type, name, cname.start, params)
 
+        return FunctionHeader(return_type, name, cname.start, params)
 
 @dataclass
 class FunctionDef:
@@ -528,13 +474,7 @@ class FunctionDef:
     params: list
     return_type: typing.Optional[typing.Any]
     body: StatementBlock
-    local_table: SymbolTable = field(default_factory=SymbolTable, init=False)
-
-    @pe.ExAction
-    def create(attrs, coords, res_coord):
-        header, body = attrs
-        cdefine, cheader, cbody, cend = coords
-        return FunctionDef(header.name, header.name_coord, header.params, header.return_type, body)
+    local_table: typing.Optional[SymbolTable] = field(default=None, init=False)
 
     def check(self, context):
         self.local_table = SymbolTable()
@@ -547,11 +487,11 @@ class FunctionDef:
                 param.name_coord,
                 SemanticContext.is_mutable_name(param.name),
             )
+
             if not self.local_table.add_symbol(symbol):
                 raise DuplicateVariable(param.name_coord, param.name)
 
         self.body.check(function_context)
-
 
 @dataclass
 class DeclItem:
@@ -571,16 +511,10 @@ class DeclItem:
         cname, cassign, cexpr = coords
         return DeclItem(name, cname.start, expr, cassign.start)
 
-
 @dataclass
 class DeclStatement(Statement):
     type: typing.Any
     items: list
-
-    @pe.ExAction
-    def create(attrs, coords, res_coord):
-        type_, items = attrs
-        return DeclStatement(type_, items)
 
     def check(self, context):
         for item in self.items:
@@ -589,6 +523,7 @@ class DeclStatement(Statement):
 
             if item.expr is not None:
                 item.expr.check(context)
+
                 if not assignment_compatible(self.type, item.expr.type):
                     raise BadAssignmentType(item.assign_coord, self.type, item.expr.type)
 
@@ -598,28 +533,27 @@ class DeclStatement(Statement):
                 item.name_coord,
                 SemanticContext.is_mutable_name(item.name),
             )
-            context.scope.add_symbol(symbol)
 
+            context.scope.add_symbol(symbol)
 
 @dataclass
 class AssignStatement(Statement):
     variable: Expr
     expr: Expr
     assign_coord: pe.Position
-    coord: pe.Fragment = None
 
     @pe.ExAction
     def create(attrs, coords, res_coord):
         variable, expr = attrs
         cvariable, cassign, cexpr = coords
-        return AssignStatement(variable, expr, cassign.start, res_coord)
+        return AssignStatement(variable, expr, cassign.start)
 
     def check(self, context):
         target_type = self.variable.check_lvalue(context)
         self.expr.check(context)
+
         if not assignment_compatible(target_type, self.expr.type):
             raise BadAssignmentType(self.assign_coord, target_type, self.expr.type)
-
 
 @dataclass
 class CallExpr(Expr):
@@ -636,8 +570,9 @@ class CallExpr(Expr):
         return CallExpr(func, cfunc.start, args, res_coord)
 
     def check_call(self, context):
-        function = context.functions.get(self.func)
-        if function is None:
+        function = context.functions.find_symbol(self.func)
+
+        if function is None or not isinstance(function, FunctionSymbol):
             raise UnknownFunction(self.func_coord, self.func)
 
         if len(self.args) != len(function.params):
@@ -646,6 +581,7 @@ class CallExpr(Expr):
         for number, pair in enumerate(zip(self.args, function.params), start=1):
             arg, expected_type = pair
             arg.check(context)
+
             if not same_type(expected_type, arg.type):
                 raise BadArgumentType(arg.error_pos(), self.func, number, expected_type, arg.type)
 
@@ -653,24 +589,19 @@ class CallExpr(Expr):
 
     def check(self, context):
         self.check_call(context)
+
         if self.type is None:
             raise ProcedureUsedAsExpression(self.func_coord, self.func)
-
 
 @dataclass
 class CallStatement(Statement):
     call: CallExpr
 
-    @pe.ExAction
-    def create(attrs, coords, res_coord):
-        call, = attrs
-        return CallStatement(call)
-
     def check(self, context):
         self.call.check_call(context)
+
         if self.call.type is not None:
             raise FunctionUsedAsStatement(self.call.func_coord, self.call.func)
-
 
 @dataclass
 class IfBranch:
@@ -683,13 +614,6 @@ class IfBranch:
         branches, condition, body = attrs
         cbranches, celsif, ccondition, cthen, cbody = coords
         return branches + [IfBranch(condition, ccondition, body)]
-
-    def check(self, context):
-        self.condition.check(context)
-        if self.condition.type != Type.Bool:
-            raise BadConditionType(self.condition_coord.start, self.condition.type)
-        self.body.check(context)
-
 
 @dataclass
 class IfStatement(Statement):
@@ -704,10 +628,14 @@ class IfStatement(Statement):
 
     def check(self, context):
         for branch in self.branches:
-            branch.check(context)
+            branch.condition.check(context)
+
+            if branch.condition.type != Type.Bool:
+                raise BadConditionType(branch.condition_coord.start, branch.condition.type)
+
+            branch.body.check(context)
 
         self.else_body.check(context)
-
 
 @dataclass
 class WhileStatement(Statement):
@@ -723,10 +651,11 @@ class WhileStatement(Statement):
 
     def check(self, context):
         self.condition.check(context)
+
         if self.condition.type != Type.Bool:
             raise BadConditionType(self.condition_coord.start, self.condition.type)
-        self.body.check(context)
 
+        self.body.check(context)
 
 @dataclass
 class ForInit:
@@ -735,7 +664,6 @@ class ForInit:
     variable_coord: pe.Position
     assign_coord: pe.Position
     start: Expr
-    start_coord: pe.Fragment
 
     @staticmethod
     def create(with_type):
@@ -744,13 +672,13 @@ class ForInit:
             if with_type:
                 type_, variable, start = attrs
                 ctype, cvariable, cassign, cstart = coords
-                return ForInit(type_, variable, cvariable.start, cassign.start, start, cstart)
+                return ForInit(type_, variable, cvariable.start, cassign.start, start)
 
             variable, start = attrs
             cvariable, cassign, cstart = coords
-            return ForInit(None, variable, cvariable.start, cassign.start, start, cstart)
-        return action
+            return ForInit(None, variable, cvariable.start, cassign.start, start)
 
+        return action
 
 @dataclass
 class ForStatement(Statement):
@@ -759,25 +687,24 @@ class ForStatement(Statement):
     variable_coord: pe.Position
     assign_coord: pe.Position
     start: Expr
-    start_coord: pe.Fragment
     end: Expr
     end_coord: pe.Fragment
     step: Expr
     step_coord: pe.Fragment
     body: StatementBlock
-    local_table: SymbolTable = field(default_factory=SymbolTable, init=False)
+    local_table: typing.Optional[SymbolTable] = field(default=None, init=False)
 
     @pe.ExAction
     def create(attrs, coords, res_coord):
         init, end, step, body = attrs
         cinit, cto, cend_expr, cstep, cdo, cbody, cend_kw = coords
+
         return ForStatement(
             init.type,
             init.variable,
             init.variable_coord,
             init.assign_coord,
             init.start,
-            init.start_coord,
             end,
             cend_expr,
             step,
@@ -793,9 +720,12 @@ class ForStatement(Statement):
 
         if self.type is None:
             symbol = context.scope.find_symbol(self.variable)
-            if symbol is None:
+
+            if symbol is None or not isinstance(symbol, VariableSymbol):
                 raise UnknownVariable(self.variable_coord, self.variable)
+
             variable_type = symbol.type
+
             if not symbol.mutable:
                 raise ImmutableVariable(self.variable_coord, self.variable)
         else:
@@ -805,10 +735,13 @@ class ForStatement(Statement):
                 self.variable_coord,
                 SemanticContext.is_mutable_name(self.variable),
             )
+
             if not self.local_table.add_symbol(symbol):
                 raise DuplicateVariable(self.variable_coord, self.variable)
+
             if not symbol.mutable:
                 raise ImmutableVariable(self.variable_coord, self.variable)
+
             variable_type = self.type
 
         if variable_type not in (Type.Int, Type.Char):
@@ -818,15 +751,16 @@ class ForStatement(Statement):
             raise BadAssignmentType(self.assign_coord, variable_type, self.start.type)
 
         self.end.check(loop_context)
+
         if not assignment_compatible(variable_type, self.end.type):
             raise BadAssignmentType(self.end_coord.start, variable_type, self.end.type)
 
         self.step.check(loop_context)
+
         if self.step.type != Type.Int:
-            raise BadForStepType(self.step.error_pos(), self.step.type)
+            raise BadForStepType(self.step_coord.start, self.step.type)
 
         self.body.check(loop_context)
-
 
 @dataclass
 class DoWhileStatement(Statement):
@@ -843,9 +777,9 @@ class DoWhileStatement(Statement):
     def check(self, context):
         self.body.check(context)
         self.condition.check(context)
+
         if self.condition.type != Type.Bool:
             raise BadConditionType(self.condition_coord.start, self.condition.type)
-
 
 @dataclass
 class ReturnStatement(Statement):
@@ -867,6 +801,7 @@ class ReturnStatement(Statement):
         if context.return_type is None:
             if self.expr is None:
                 return
+
             self.expr.check(context)
             raise UnexpectedReturnValue(self.return_coord, self.expr.type)
 
@@ -874,9 +809,9 @@ class ReturnStatement(Statement):
             raise MissingReturnValue(self.return_coord, context.return_type)
 
         self.expr.check(context)
+
         if not same_type(context.return_type, self.expr.type):
             raise BadReturnType(self.expr_coord.start, context.return_type, self.expr.type)
-
 
 @dataclass
 class AssertStatement(Statement):
@@ -891,9 +826,9 @@ class AssertStatement(Statement):
 
     def check(self, context):
         self.condition.check(context)
+
         if self.condition.type != Type.Bool:
             raise BadConditionType(self.condition_coord.start, self.condition.type)
-
 
 @dataclass
 class VariableExpr(Expr):
@@ -911,17 +846,20 @@ class VariableExpr(Expr):
 
     def check(self, context):
         symbol = context.scope.find_symbol(self.varname)
-        if symbol is None:
+
+        if symbol is None or not isinstance(symbol, VariableSymbol):
             raise UnknownVariable(self.var_coord, self.varname)
+
         self.type = symbol.type
         self.mutable = symbol.mutable
 
     def check_lvalue(self, context):
         self.check(context)
+
         if not self.mutable:
             raise ImmutableVariable(self.var_coord, self.varname)
-        return self.type
 
+        return self.type
 
 @dataclass
 class ConstExpr(Expr):
@@ -937,12 +875,13 @@ class ConstExpr(Expr):
                 value, = attrs
             else:
                 value = value_marker
+
             return ConstExpr(value, type_, res_coord)
+
         return action
 
     def check(self, context):
         pass
-
 
 @dataclass
 class IndexExpr(Expr):
@@ -961,10 +900,12 @@ class IndexExpr(Expr):
 
     def check(self, context):
         self.array.check(context)
+
         if not is_array_type(self.array.type):
             raise BadIndexing(self.bracket_coord, self.array.type)
 
         self.index.check(context)
+
         if self.index.type not in (Type.Int, Type.Char):
             raise BadIndexType(self.index_coord.start, self.index.type)
 
@@ -973,7 +914,6 @@ class IndexExpr(Expr):
     def check_lvalue(self, context):
         self.check(context)
         return self.type
-
 
 @dataclass
 class NewExpr(Expr):
@@ -992,10 +932,11 @@ class NewExpr(Expr):
 
     def check(self, context):
         self.size.check(context)
+
         if self.size.type != Type.Int:
             raise BadNewSizeType(self.size_coord.start, self.size.type)
-        self.type = ArrayType(self.element_type)
 
+        self.type = ArrayType(self.element_type)
 
 @dataclass
 class BinOpExpr(Expr):
@@ -1015,16 +956,21 @@ class BinOpExpr(Expr):
             else:
                 left, right = attrs
                 op = fixed_op
+
             cleft, cop, cright = coords
             return BinOpExpr(left, op, cop.start, right, res_coord)
+
         return action
 
     def check(self, context):
         self.left.check(context)
         self.right.check(context)
+
         result = binary_result_type(self.left.type, self.op, self.right.type)
+
         if result is None:
             raise BadBinaryType(self.op_coord, self.left.type, self.op, self.right.type)
+
         self.type = result
 
 
@@ -1043,10 +989,12 @@ class UnOpExpr(Expr):
             expr, = attrs
             cop, cexpr = coords
             return UnOpExpr(op, cop.start, expr, res_coord)
+
         return action
 
     def check(self, context):
         self.expr.check(context)
+
         if self.op == '-':
             if self.expr.type in (Type.Int, Type.Char):
                 self.type = Type.Int
@@ -1055,32 +1003,39 @@ class UnOpExpr(Expr):
             if self.expr.type == Type.Bool:
                 self.type = Type.Bool
                 return
-        raise BadUnaryType(self.op_coord, self.op, self.expr.type)
 
+        raise BadUnaryType(self.op_coord, self.op, self.expr.type)
 
 # ---------- Terminals ----------
 
 IDENT = pe.Terminal('IDENT', '[A-Za-z][A-Za-z0-9_]*', str)
-FUNCNAME = pe.Terminal('FUNCNAME', '[A-Z][A-Za-z0-9_]*(?=\\s*\\()', str)
+
+FUNCNAME = pe.Terminal(
+    'FUNCNAME',
+    '[A-Z][A-Za-z0-9_]*(?=\\s*\\()',
+    str,
+)
+
 INT_CONST = pe.Terminal(
     'INT_CONST',
     '(\\{[0-9]+\\}[0-9A-Za-z]+|[0-9]+)',
     str,
-    priority=7
+    priority=7,
 )
+
 CHAR_CONST = pe.Terminal(
     'CHAR_CONST',
     "'([^'\\n]|'')'|\\#[A-Z]+|\\#\\{[0-9A-Fa-f]+\\}",
     str,
-    priority=7
+    priority=7,
 )
+
 STRING_CONST = pe.Terminal(
     'STRING_CONST',
     '("([^"\\n])*"|\\$QUOT|\\$[A-Z]+|\\$\\{[0-9A-Fa-f]+\\})([ \\t\\r\\n]+("([^"\\n])*"|\\$QUOT|\\$[A-Z]+|\\$\\{[0-9A-Fa-f]+\\}))*',
     str,
-    priority=7
+    priority=7,
 )
-
 
 def make_keyword(word):
     return pe.Terminal(
@@ -1088,9 +1043,8 @@ def make_keyword(word):
         word,
         lambda _: None,
         re_flags=re.IGNORECASE,
-        priority=10
+        priority=10,
     )
-
 
 KW_AND = make_keyword('and')
 KW_ELSE = make_keyword('else')
@@ -1161,12 +1115,19 @@ NPrimaryExpr, NFunctionCall, NActualParamsOpt, NActualParams, NConstant = \
 
 # ---------- Грамматика ----------
 
-NProgram |= NFunctionDefs, Program.create
+NProgram |= NFunctionDefs, Program
 
 NFunctionDefs |= NFunctionDef, lambda fd: [fd]
 NFunctionDefs |= NFunctionDefs, NFunctionDef, lambda fds, fd: fds + [fd]
 
-NFunctionDef |= KW_DEFINE, NFunctionHeader, NStatementBlock, KW_END, FunctionDef.create
+NFunctionDef |= KW_DEFINE, NFunctionHeader, NStatementBlock, KW_END, \
+    lambda header, body: FunctionDef(
+        header.name,
+        header.name_coord,
+        header.params,
+        header.return_type,
+        body,
+    )
 
 NFunctionHeader |= NReturnTypeOpt, FUNCNAME, '(', NFormalParamsOpt, ')', FunctionHeader.create
 
@@ -1188,8 +1149,8 @@ NPrimitiveType |= KW_INT, lambda: Type.Int
 NPrimitiveType |= KW_CHAR, lambda: Type.Char
 NPrimitiveType |= KW_BOOL, lambda: Type.Bool
 
-NStatementBlock |= StatementBlock.create
-NStatementBlock |= NStatements, StatementBlock.create
+NStatementBlock |= lambda: StatementBlock([])
+NStatementBlock |= NStatements, lambda statements: StatementBlock(statements)
 
 NStatements |= NStatement, lambda st: [st]
 NStatements |= NStatements, ';', NStatement, lambda sts, st: sts + [st]
@@ -1204,7 +1165,7 @@ NStatement |= NDoWhileStatement
 NStatement |= NReturnStatement
 NStatement |= NAssertStatement
 
-NDeclStatement |= NType, NDeclItems, DeclStatement.create
+NDeclStatement |= NType, NDeclItems, DeclStatement
 
 NDeclItems |= NDeclItem, lambda item: [item]
 NDeclItems |= NDeclItems, ',', NDeclItem, lambda items, item: items + [item]
@@ -1214,7 +1175,7 @@ NDeclItem |= IDENT, ':=', NExpr, DeclItem.create
 
 NAssignStatement |= NExpr, ':=', NExpr, AssignStatement.create
 
-NCallStatement |= NFunctionCall, CallStatement.create
+NCallStatement |= NFunctionCall, CallStatement
 
 NIfStatement |= KW_IF, NExpr, KW_THEN, NStatementBlock, NElsifParts, NElsePartOpt, KW_END, IfStatement.create
 
