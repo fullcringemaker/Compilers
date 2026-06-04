@@ -1,0 +1,5 @@
+define int Main(char array array args)
+int x := y + 1;
+int y := 10;
+return x
+end

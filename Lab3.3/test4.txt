@@ -1,0 +1,10 @@
+define int Main(char array array args)
+int x := 10;
+char c := 'A';
+int result := Add(x, c);
+return result
+end
+
+define int Add(int a, int b)
+return a + b
+end

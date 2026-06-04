@@ -1,0 +1,20 @@
+define Main(char array array args)
+char array text := "hello";
+int count := Length(text);
+PrintCount(count);
+char c := 'A';
+int code := c;
+do
+    code := code - 1
+while code > 60;
+assert count > 0
+end
+
+define int Length(char array s)
+int result := 5;
+return result
+end
+
+define PrintCount(int value)
+assert value >= 0
+end

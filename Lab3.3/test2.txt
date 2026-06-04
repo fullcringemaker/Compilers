@@ -1,0 +1,29 @@
+define int Main(char array array args)
+int n := 5;
+int array a := MakeVector(n);
+int s := Sum(a, n);
+if s > 0 then
+    s := s + 1
+elsif s = 0 then
+    s := 1
+else
+    s := s - 1
+end;
+return s
+end
+
+define int array MakeVector(int size)
+int array result := new int[size];
+int i := 0 to size - 1 do
+    result[i] := i + 1
+end;
+return result
+end
+
+define int Sum(int array a, int size)
+int sum := 0;
+int i := 0 to size - 1 do
+    sum := sum + a[i]
+end;
+return sum
+end
